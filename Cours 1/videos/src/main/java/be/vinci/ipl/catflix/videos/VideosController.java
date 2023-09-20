@@ -62,7 +62,7 @@ public class VideosController {
      * Create a video
      * @request POST /videos
      * @body video to create
-     * @response 209: video already exists, 201: returns created video
+     * @response 409: video already exists, 201: returns created video
      */
     @PostMapping("/videos")
     public ResponseEntity<Video> createOne(@RequestBody Video video) {
