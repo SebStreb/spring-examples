@@ -1,0 +1,118 @@
+openapi: 3.0.3
+info:
+  title: Catflix video service
+  description: Microservice handling database of videos in Catflix project
+  version: 1.0.0
+servers:
+  - url: http://localhost:9001
+    description: Development server
+paths:
+
+  /videos:
+
+    post:
+      summary: Create a video
+      requestBody:
+        description: Video to create
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/video'
+      responses:
+        409:
+          description: Video already exists
+        201:
+          description: Video created
+
+    get:
+      summary: Read all videos
+      responses:
+        200:
+          description: Returned list of videos
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/video'
+
+    delete:
+      summary: Delete all videos
+      responses:
+        200:
+          description: All videos are deleted
+
+
+  /videos/{hash}:
+    parameters:
+      - name: hash
+        in: path
+        description: Hash of the video
+        required: true
+        schema:
+          type: string
+          example: dQw4w9WgXcQ
+        style: simple
+
+    get:
+      summary: Read a video
+      responses:
+        404:
+          description: Video not found
+        200:
+          description: Returned video
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/video'
+
+    put:
+      summary: Update a video
+      requestBody:
+        description: New values of the video
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/video'
+      responses:
+        400:
+          description: Non matching video hashes
+        404:
+          description: Video not found
+        200:
+          description: Updated video
+
+    delete:
+      summary: Delete a video
+      responses:
+        404:
+          description: Video not found
+        200:
+          description: Deleted video
+
+components:
+  schemas:
+    video:
+      type: object
+      properties:
+        hash:
+          type: string
+        name:
+          type: string
+        author:
+          type: string
+        creationYear:
+          type: integer
+        duration:
+          type: integer
+          description: in seconds
+        url:
+          type: string
+      example:
+        hash: dQw4w9WgXcQ
+        name: Cutest kitty ever
+        author: Cat4Life
+        creationYear: 2009
+        duration: 212
+        url: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+  

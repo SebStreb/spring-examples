@@ -1,0 +1,45 @@
+### Create review
+POST http://localhost:9003/reviews
+Content-Type: application/json
+
+{
+  "pseudo": "Cat4Life",
+  "hash": "JxS5E-kZc2s",
+  "rating": 4,
+  "comment": "Meh…"
+}
+
+### Read review
+GET http://localhost:9003/reviews?pseudo=Cat4Life&hash=JxS5E-kZc2s
+
+### Update review
+PUT http://localhost:9003/reviews
+Content-Type: application/json
+
+{
+  "pseudo": "pettier",
+  "hash": "dQw4w9WgXcQ",
+  "rating": 9,
+  "comment": "What?"
+}
+
+### Delete review
+DELETE http://localhost:9003/reviews?pseudo=Cat4Life&hash=JxS5E-kZc2s
+
+
+### Read reviews from user
+GET http://localhost:9003/reviews/user/Cat4Life
+
+### Delete reviews from user
+DELETE http://localhost:9003/reviews/user/Cat4Life
+
+
+### Read reviews of video
+GET http://localhost:9003/reviews/video/dQw4w9WgXcQ
+
+### Delete reviews of video
+DELETE http://localhost:9003/reviews/video/dQw4w9WgXcQ
+
+
+### Read best videos
+GET http://localhost:9003/reviews/best

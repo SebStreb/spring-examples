@@ -1,0 +1,86 @@
+openapi: 3.0.3
+info:
+  title: Catflix users service
+  description: Microservice handling users database in Catflix project
+  version: 1.0.0
+servers:
+  - url: http://localhost:9002
+    description: Development server
+paths:
+
+  /users/{pseudo}:
+    parameters:
+      - name: pseudo
+        in: path
+        schema:
+          type: string
+        example: PetWard
+        description: Pseudo of the user
+
+    post:
+      summary: Create a user
+      requestBody:
+        description: User to create
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        400:
+          description: Pseudo in path and body doesn't match
+        409:
+          description: Pseudo already used
+        201:
+          description: User created
+
+    get:
+      summary: Read a user
+      responses:
+        404:
+          description: User not found
+        200:
+          description: Found user
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/user'
+
+    put:
+      summary: Update a user
+      requestBody:
+        description: New values of the user
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        400:
+          description: Pseudo in path and body doesn't match
+        404:
+          description: User not found
+        200:
+          description: User updated
+
+    delete:
+      summary: Delete a user
+      responses:
+        404:
+          description: User not found
+        200:
+          description: User deleted
+
+components:
+  schemas:
+    user:
+      type: object
+      properties:
+        pseudo:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+      example:
+        pseudo: PetWard
+        firstname: Marine
+        lastname: Pelland

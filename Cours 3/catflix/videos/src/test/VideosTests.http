@@ -1,0 +1,37 @@
+### Create one
+POST http://localhost:9001/videos
+Content-Type: application/json
+
+{
+  "hash": "zJXRCeM5UEs",
+  "name": "My cat forgets her tongue out",
+  "author": "Charlotte Forsgård",
+  "creationYear": 2012,
+  "duration": 24,
+  "url": "https://www.youtube.com/watch?v=zJXRCeM5UEs"
+}
+
+### Read all
+GET http://localhost:9001/videos
+
+### Read one
+GET http://localhost:9001/videos/dQw4w9WgXcQ
+
+### Update one
+PUT http://localhost:9001/videos/dQw4w9WgXcQ
+Content-Type: application/json
+
+{
+  "hash": "dQw4w9WgXcQ",
+  "name": "Rick Astley - Never Gonna Give You Up (Official Music Video)",
+  "author": "Rick Astley",
+  "creationYear": 2009,
+  "duration": 212,
+  "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+}
+
+### Delete all
+DELETE http://localhost:9001/videos
+
+### Delete one
+DELETE http://localhost:9001/videos/zJXRCeM5UEs
