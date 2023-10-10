@@ -12,14 +12,33 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
-@Entity
+@Entity(name = "videos")
 public class Video {
     @Id
+    @Column(nullable = false)
     private String hash;
+
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
     private String author;
-    @Column(name = "creation_year")
+
+    @Column(name = "creation_year", nullable = false)
     private int creationYear;
+
+    @Column(nullable = false)
     private int duration; // in seconds
+
+    @Column(nullable = false)
     private String url;
+
+    public boolean invalid() {
+        return hash == null || hash.isBlank() ||
+                name == null || name.isBlank() ||
+                author == null || author.isBlank() ||
+                creationYear < 1970 ||
+                duration <= 0 ||
+                url == null || url.isBlank();
+    }
 }

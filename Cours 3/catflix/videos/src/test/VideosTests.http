@@ -1,5 +1,5 @@
 ### Create one
-POST http://localhost:9001/videos
+POST http://localhost:9001/videos/zJXRCeM5UEs
 Content-Type: application/json
 
 {
@@ -35,3 +35,9 @@ DELETE http://localhost:9001/videos
 
 ### Delete one
 DELETE http://localhost:9001/videos/zJXRCeM5UEs
+
+### Read from author
+GET http://localhost:9001/videos/user/Rick Astley
+
+### Delete from author
+DELETE http://localhost:9001/videos/user/Rick Astley

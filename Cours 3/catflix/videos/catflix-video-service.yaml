@@ -10,20 +10,6 @@ paths:
 
   /videos:
 
-    post:
-      summary: Create a video
-      requestBody:
-        description: Video to create
-        content:
-          'application/json':
-            schema:
-              $ref: '#/components/schemas/video'
-      responses:
-        409:
-          description: Video already exists
-        201:
-          description: Video created
-
     get:
       summary: Read all videos
       responses:
@@ -52,7 +38,22 @@ paths:
         schema:
           type: string
           example: dQw4w9WgXcQ
-        style: simple
+
+    post:
+      summary: Create a video
+      requestBody:
+        description: Video to create
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/video'
+      responses:
+        400:
+          description: Hash does not match or video invalid
+        409:
+          description: Video already exists
+        201:
+          description: Created video
 
     get:
       summary: Read a video
@@ -76,7 +77,7 @@ paths:
               $ref: '#/components/schemas/video'
       responses:
         400:
-          description: Non matching video hashes
+          description: Hash does not match or video invalid
         404:
           description: Video not found
         200:
@@ -89,6 +90,35 @@ paths:
           description: Video not found
         200:
           description: Deleted video
+
+  /videos/user/{author}:
+    parameters:
+      - name: author
+        in: path
+        required: true
+        description: Author of the videos
+        schema:
+          type: string
+          example: Cat4Life
+
+    get:
+      summary: Read all videos from an author
+      responses:
+        200:
+          description: Returned list of videos
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/video'
+
+    delete:
+      summary: Delete all videos from an author
+      responses:
+        200:
+          description: Deleted videos
+
 
 components:
   schemas:
@@ -115,4 +145,3 @@ components:
         creationYear: 2009
         duration: 212
         url: https://www.youtube.com/watch?v=dQw4w9WgXcQ
-  

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 public class VideosController {
@@ -59,20 +60,6 @@ public class VideosController {
 
 
     /**
-     * Create a video
-     * @request POST /videos
-     * @body video to create
-     * @response 409: video already exists, 201: returns created video
-     */
-    @PostMapping("/videos")
-    public ResponseEntity<Video> createOne(@RequestBody Video video) {
-        if (exists(video.getHash())) return new ResponseEntity<>(HttpStatus.CONFLICT);
-
-        videos.add(video);
-        return new ResponseEntity<>(video, HttpStatus.CREATED);
-    }
-
-    /**
      * Read all videos
      * @request GET /videos
      * @response 200: returns all videos
@@ -80,6 +67,33 @@ public class VideosController {
     @GetMapping("/videos")
     public Iterable<Video> readAll() {
         return videos;
+    }
+
+    /**
+     * Delete all videos
+     * @request DELETE /videos
+     * @response 200: all videos are deleted
+     */
+    @DeleteMapping("/videos")
+    public void deleteAll() {
+        videos.clear();
+    }
+
+
+    /**
+     * Create a video
+     * @request POST /videos
+     * @body video to create
+     * @response 409: video already exists, 201: returns created video
+     */
+    @PostMapping("/videos/{hash}")
+    public ResponseEntity<Video> createOne(@PathVariable String hash, @RequestBody Video video) {
+        if (!Objects.equals(video.getHash(), hash)) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (video.invalid()) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (exists(video.getHash())) return new ResponseEntity<>(HttpStatus.CONFLICT);
+
+        videos.add(video);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     /**
@@ -103,23 +117,14 @@ public class VideosController {
      */
     @PutMapping("/videos/{hash}")
     public ResponseEntity<Video> updateOne(@PathVariable String hash, @RequestBody Video video) {
-        if (!video.getHash().equals(hash)) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (!Objects.equals(video.getHash(), hash)) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (video.invalid()) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
         int index = findIndex(hash);
         if (index == -1) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        Video oldVideo = videos.set(index, video);
-        return new ResponseEntity<>(oldVideo, HttpStatus.OK);
-    }
-
-    /**
-     * Delete all videos
-     * @request DELETE /videos
-     * @response 200: all videos are deleted
-     */
-    @DeleteMapping("/videos")
-    public void deleteAll() {
-        videos.clear();
+        videos.set(index, video);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -132,8 +137,20 @@ public class VideosController {
         int index = findIndex(hash);
         if (index == -1) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
-        Video video = videos.remove(index);
-        return new ResponseEntity<>(video, HttpStatus.OK);
+        videos.remove(index);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/videos/user/{author}")
+    public Iterable<Video> readFromAuthor(@PathVariable String author) {
+        return videos.stream().filter(it -> Objects.equals(it.getAuthor(), author)).toList();
+    }
+
+    @DeleteMapping("/videos/user/{author}")
+    public void deleteFromAuthor(@PathVariable String author) {
+        List<Video> others = videos.stream().filter(it -> !Objects.equals(it.getAuthor(), author)).toList();
+        videos.clear();
+        videos.addAll(others);
     }
 
 }

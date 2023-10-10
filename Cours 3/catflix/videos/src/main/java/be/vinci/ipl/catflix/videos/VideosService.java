@@ -68,4 +68,21 @@ public class VideosService {
         return true;
     }
 
+    /**
+     * Reads all videos from an author
+     * @param author the author of the videos
+     * @return all videos from this author
+     */
+    public Iterable<Video> readFromAuthor(String author) {
+        return repository.findByAuthor(author);
+    }
+
+    /**
+     * Deletes all videos from an author
+     * @param author the author of the videos
+     */
+    public void deleteFromAuthor(String author) {
+        repository.deleteByAuthor(author);
+    }
+
 }

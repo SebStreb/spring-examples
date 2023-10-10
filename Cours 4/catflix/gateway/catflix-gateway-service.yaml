@@ -1,0 +1,419 @@
+openapi: 3.0.3
+info:
+  title: Catflix gateway service
+  description: Microservice handling gateway for Catflix project
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+    description: Development server
+paths:
+
+  /auth:
+    post:
+      summary: Connect user
+      requestBody:
+        description: Credentials of the user
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/credentials'
+      responses:
+        400:
+          description: Invalid
+        401:
+          description: Wrong username or password
+        200:
+          description: Returned token
+          content:
+            'application/json':
+              schema:
+                type: string
+                example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJhdXRoMCIsInBzZXVkbyI6IkNhdDRMaWZlIn0.LqfooEI-I9VTBo-isjm812ttnIPagMCwdhRkW5ngn0_tlLX86LRoxahgskmgIeWDbm4Mu3y3D8Qbhq_71hNQTA
+
+  /users/{pseudo}:
+    parameters:
+      - name: pseudo
+        in: path
+        description: Pseudo of the user
+        schema:
+          type: string
+        example: PetWard
+    post:
+      summary: Create user
+      requestBody:
+        description: User
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/userWithCredentials'
+      responses:
+        400:
+          description: Invalid
+        409:
+          description: Already exists
+        201:
+          description: Created
+    get:
+      summary: Read user
+      responses:
+        404:
+          description: Not found
+        200:
+          description: Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/user'
+    put:
+      summary: Update user
+      requestBody:
+        description: User
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/userWithCredentials'
+      responses:
+        400:
+          description: Invalid
+        401:
+          description: Wrong authorization token
+        403:
+          description: Wrong user
+        404:
+          description: Not found
+        200:
+          description: Updated
+    delete:
+      summary: Delete user
+      responses:
+        401:
+          description: Wrong authorization token
+        403:
+          description: Wrong user
+        404:
+          description: Not found
+        200:
+          description: Deleted
+
+  /users/{pseudo}/videos:
+    get:
+      summary: Read user videos
+      parameters:
+        - name: pseudo
+          in: path
+          description: Pseudo of the user
+          schema:
+            type: string
+          example: PetWard
+      responses:
+        404:
+          description: Not found
+        200:
+          description: Found
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/video'
+
+  /users/{pseudo}/reviews:
+    get:
+      summary: Read user reviews
+      parameters:
+        - name: pseudo
+          in: path
+          description: Pseudo of the user
+          schema:
+            type: string
+          example: PetWard
+      responses:
+        404:
+          description: Not found
+        200:
+          description: Found
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/review'
+
+  /videos:
+    get:
+      summary: Read all videos
+      responses:
+        200:
+          description: Found
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/video'
+
+  /videos/best:
+    get:
+      summary: Read 3 best rated videos
+      responses:
+        200:
+          description: Found
+          content:
+            'application/json':
+              schema:
+                type: array
+                maxItems: 3
+                items:
+                  $ref: '#/components/schemas/video'
+
+  /videos/{hash}:
+    parameters:
+      - name: hash
+        in: path
+        description: Hash of the video
+        schema:
+          type: string
+        example: dQw4w9WgXcQ
+    post:
+      summary: Create video
+      requestBody:
+        description: Video
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/video'
+      responses:
+        400:
+          description: Invalid
+        401:
+          description: Wrong authorization token
+        403:
+          description: Wrong user
+        404:
+          description: User not found
+        409:
+          description: Already exists
+        201:
+          description: Created
+    get:
+      summary: Read video
+      responses:
+        404:
+          description: Not found
+        200:
+          description: Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/video'
+    put:
+      summary: Update video
+      requestBody:
+        description: Video
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/video'
+      responses:
+        400:
+          description: Invalid
+        401:
+          description: Wrong authorization token
+        403:
+          description: Wrong user
+        404:
+          description: Not found
+        200:
+          description: Updated
+    delete:
+      summary: Delete video
+      responses:
+        401:
+          description: Wrong authorization token
+        403:
+          description: Wrong user
+        404:
+          description: Not found
+        200:
+          description: Deleted
+
+  /videos/{hash}/reviews:
+    get:
+      summary: Read video reviews
+      parameters:
+        - name: hash
+          in: path
+          description: Hash of the video
+          schema:
+            type: string
+          example: dQw4w9WgXcQ
+      responses:
+        404:
+          description: Not found
+        200:
+          description: Found
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/review'
+
+  /reviews/{pseudo}/{hash}:
+    parameters:
+      - name: pseudo
+        in: path
+        description: Pseudo of the user
+        schema:
+          type: string
+        example: PetWard
+      - name: hash
+        in: path
+        description: Hash of the video
+        schema:
+          type: string
+        example: dQw4w9WgXcQ
+    post:
+      summary: Create review
+      requestBody:
+        description: Review
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/review'
+      responses:
+        400:
+          description: Invalid
+        401:
+          description: Wrong authorization token
+        403:
+          description: Wrong user
+        404:
+          description: User or video not found
+        409:
+          description: Already exists
+        201:
+          description: Created
+    get:
+      summary: Read review
+      responses:
+        404:
+          description: Not found
+        200:
+          description: Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/review'
+    put:
+      summary: Update review
+      requestBody:
+        description: Review
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/review'
+      responses:
+        400:
+          description: Invalid
+        401:
+          description: Wrong authorization token
+        403:
+          description: Wrong user
+        404:
+          description: Not found
+        200:
+          description: Updated
+    delete:
+      summary: Delete review
+      responses:
+        401:
+          description: Wrong authorization token
+        403:
+          description: Wrong user
+        404:
+          description: Not found
+        200:
+          description: Deleted
+
+components:
+  schemas:
+    user:
+      type: object
+      properties:
+        pseudo:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+      example:
+        pseudo: PetWard
+        firstname: Marine
+        lastname: Pelland
+    video:
+      type: object
+      properties:
+        hash:
+          type: string
+        name:
+          type: string
+        author:
+          type: string
+        creationYear:
+          type: integer
+        duration:
+          type: integer
+          description: in seconds
+        url:
+          type: string
+      example:
+        hash: dQw4w9WgXcQ
+        name: Cutest kitty ever
+        author: PetWard
+        creationYear: 2009
+        duration: 212
+        url: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+    review:
+      type: object
+      properties:
+        pseudo:
+          type: string
+        hash:
+          type: string
+        rating:
+          type: number
+        comment:
+          type: string
+      example:
+        pseudo: PetWard
+        hash: dQw4w9WgXcQ
+        rating: 10
+        comment: Best video!
+    credentials:
+      type: object
+      properties:
+        pseudo:
+          type: string
+        password:
+          type: string
+      example:
+        pseudo: PetWard
+        password: password123
+    userWithCredentials:
+      type: object
+      properties:
+        pseudo:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        password:
+          type: string
+      example:
+        pseudo: PetWard
+        firstname: Marine
+        lastname: Pelland
+        password: password123
+  

@@ -4,29 +4,11 @@ info:
   description: Microservice handling database of videos in Catflix project
   version: 1.0.0
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:9001
     description: Development server
 paths:
 
   /videos:
-
-    post:
-      summary: Create a video
-      requestBody:
-        description: Video to create
-        content:
-          'application/json':
-            schema:
-              $ref: '#/components/schemas/video'
-      responses:
-        409:
-          description: Video already exists
-        201:
-          description: Video created
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/video'
 
     get:
       summary: Read all videos
@@ -56,7 +38,22 @@ paths:
         schema:
           type: string
           example: dQw4w9WgXcQ
-        style: simple
+
+    post:
+      summary: Create a video
+      requestBody:
+        description: Video to create
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/video'
+      responses:
+        400:
+          description: Hash does not match or video invalid
+        409:
+          description: Video already exists
+        201:
+          description: Created video
 
     get:
       summary: Read a video
@@ -80,15 +77,11 @@ paths:
               $ref: '#/components/schemas/video'
       responses:
         400:
-          description: Non matching video hashes
+          description: Hash does not match or video invalid
         404:
           description: Video not found
         200:
-          description: Updated video, returned old values
-          content:
-            'application/json':
-              schema:
-                $ref: '#/components/schemas/video'
+          description: Updated video
 
     delete:
       summary: Delete a video
@@ -97,6 +90,35 @@ paths:
           description: Video not found
         200:
           description: Deleted video
+
+  /videos/user/{author}:
+    parameters:
+      - name: author
+        in: path
+        required: true
+        description: Author of the videos
+        schema:
+          type: string
+          example: Cat4Life
+
+    get:
+      summary: Read all videos from an author
+      responses:
+        200:
+          description: Returned list of videos
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/video'
+
+    delete:
+      summary: Delete all videos from an author
+      responses:
+        200:
+          description: Deleted videos
+
 
 components:
   schemas:
@@ -123,4 +145,3 @@ components:
         creationYear: 2009
         duration: 212
         url: https://www.youtube.com/watch?v=dQw4w9WgXcQ
-  
