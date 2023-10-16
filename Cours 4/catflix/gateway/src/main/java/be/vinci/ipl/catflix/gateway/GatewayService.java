@@ -157,23 +157,18 @@ public class GatewayService {
         videosProxy.deleteVideosFromAuthor(pseudo);
 
         boolean found = true;
-
         try {
             authenticationProxy.deleteCredentials(pseudo);
         } catch (FeignException e) {
             if (e.status() == 404) found = false;
             else throw e;
         }
-
         try {
             usersProxy.deleteUser(pseudo);
         } catch (FeignException e) {
             if (e.status() == 404) found = false;
             else throw e;
         }
-
-        System.out.println(found);
-
         return found;
     }
 
