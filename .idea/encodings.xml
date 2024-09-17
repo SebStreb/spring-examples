@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/Cours 1/videos/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cours 2/videos/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cours 3/catflix/eureka/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cours 3/catflix/reviews/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cours 3/catflix/users/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cours 3/catflix/videos/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cours 4/catflix/authentication/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cours 4/catflix/eureka/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cours 4/catflix/gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cours 4/catflix/reviews/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cours 4/catflix/users/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cours 4/catflix/videos/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cours 5/replication-exercise/dummy/src/main/kotlin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cours 5/replication-exercise/eureka/src/main/kotlin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/Cours 5/replication-exercise/gateway/src/main/kotlin" charset="UTF-8" />
+  </component>
+</project>

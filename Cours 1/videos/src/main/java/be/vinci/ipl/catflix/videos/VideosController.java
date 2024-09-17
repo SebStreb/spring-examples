@@ -3,6 +3,7 @@ package be.vinci.ipl.catflix.videos;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +61,24 @@ public class VideosController {
 
 
     /**
+     * Create a video
+     * @request POST /videos
+     * @body video to create
+     * @response 400: video invalid, 409: video already exists, 201: video created
+     */
+    @PostMapping("/videos/{hash}")
+    public ResponseEntity<Void> createOne(@PathVariable String hash, @RequestBody Video video) {
+        if (!Objects.equals(video.getHash(), hash) || video.invalid()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        if (exists(video.getHash())) throw new ResponseStatusException(HttpStatus.CONFLICT);
+
+        videos.add(video);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+
+    /**
      * Read all videos
      * @request GET /videos
      * @response 200: returns all videos
@@ -67,6 +86,36 @@ public class VideosController {
     @GetMapping("/videos")
     public Iterable<Video> readAll() {
         return videos;
+    }
+
+    /**
+     * Read a video
+     * @request GET /videos/{hash}
+     * @response 404: video not found, 200: returns found video
+     */
+    @GetMapping("/videos/{hash}")
+    public Video readOne(@PathVariable String hash) {
+        Video video = videos.stream().filter(it -> it.getHash().equals(hash)).findFirst().orElse(null);
+
+        if (video == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        else return video;
+    }
+
+    /**
+     * Update a video
+     * @request PUT /videos/{hash}
+     * @body new value of the video
+     * @response 400: video invalid, 404: video not found, 200: video updated
+     */
+    @PutMapping("/videos/{hash}")
+    public void updateOne(@PathVariable String hash, @RequestBody Video video) {
+        if (!Objects.equals(video.getHash(), hash)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if (video.invalid()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+
+        int index = findIndex(hash);
+        if (index == -1) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+
+        videos.set(index, video);
     }
 
     /**
@@ -79,78 +128,17 @@ public class VideosController {
         videos.clear();
     }
 
-
-    /**
-     * Create a video
-     * @request POST /videos
-     * @body video to create
-     * @response 409: video already exists, 201: returns created video
-     */
-    @PostMapping("/videos/{hash}")
-    public ResponseEntity<Video> createOne(@PathVariable String hash, @RequestBody Video video) {
-        if (!Objects.equals(video.getHash(), hash)) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        if (video.invalid()) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        if (exists(video.getHash())) return new ResponseEntity<>(HttpStatus.CONFLICT);
-
-        videos.add(video);
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-    /**
-     * Read a video
-     * @request GET /videos/{hash}
-     * @response 404: video not found, 200: returns found video
-     */
-    @GetMapping("/videos/{hash}")
-    public ResponseEntity<Video> readOne(@PathVariable String hash) {
-        Video video = videos.stream().filter(it -> it.getHash().equals(hash)).findFirst().orElse(null);
-
-        if (video == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(video, HttpStatus.OK);
-    }
-
-    /**
-     * Update a video
-     * @request PUT /videos/{hash}
-     * @body new value of the video
-     * @response 400: video does not match hash, 404: video not found, 200: returns old value of video
-     */
-    @PutMapping("/videos/{hash}")
-    public ResponseEntity<Video> updateOne(@PathVariable String hash, @RequestBody Video video) {
-        if (!Objects.equals(video.getHash(), hash)) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        if (video.invalid()) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        int index = findIndex(hash);
-        if (index == -1) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        videos.set(index, video);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
     /**
      * Delete a video
      * @request  DELETE /video/{hash}
-     * @response 404: video not found, 200: returns deleted video
+     * @response 404: video not found, 200: video deleted
      */
     @DeleteMapping("/videos/{hash}")
-    public ResponseEntity<Video> deleteOne(@PathVariable String hash) {
+    public void deleteOne(@PathVariable String hash) {
         int index = findIndex(hash);
-        if (index == -1) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if (index == -1) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
         videos.remove(index);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @GetMapping("/videos/user/{author}")
-    public Iterable<Video> readFromAuthor(@PathVariable String author) {
-        return videos.stream().filter(it -> Objects.equals(it.getAuthor(), author)).toList();
-    }
-
-    @DeleteMapping("/videos/user/{author}")
-    public void deleteFromAuthor(@PathVariable String author) {
-        List<Video> others = videos.stream().filter(it -> !Objects.equals(it.getAuthor(), author)).toList();
-        videos.clear();
-        videos.addAll(others);
     }
 
 }

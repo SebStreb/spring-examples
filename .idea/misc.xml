@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/Cours 1/videos/pom.xml" />
+        <option value="$PROJECT_DIR$/Cours 2/videos/pom.xml" />
+        <option value="$PROJECT_DIR$/Cours 3/catflix/users/pom.xml" />
+        <option value="$PROJECT_DIR$/Cours 3/catflix/eureka/pom.xml" />
+        <option value="$PROJECT_DIR$/Cours 3/catflix/videos/pom.xml" />
+        <option value="$PROJECT_DIR$/Cours 3/catflix/reviews/pom.xml" />
+        <option value="$PROJECT_DIR$/Cours 4/catflix/users/pom.xml" />
+        <option value="$PROJECT_DIR$/Cours 4/catflix/eureka/pom.xml" />
+        <option value="$PROJECT_DIR$/Cours 4/catflix/videos/pom.xml" />
+        <option value="$PROJECT_DIR$/Cours 4/catflix/gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/Cours 4/catflix/reviews/pom.xml" />
+        <option value="$PROJECT_DIR$/Cours 4/catflix/authentication/pom.xml" />
+        <option value="$PROJECT_DIR$/Cours 5/replication-exercise/dummy/pom.xml" />
+        <option value="$PROJECT_DIR$/Cours 5/replication-exercise/eureka/pom.xml" />
+        <option value="$PROJECT_DIR$/Cours 5/replication-exercise/gateway/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_22" default="true" project-jdk-name="22" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>
