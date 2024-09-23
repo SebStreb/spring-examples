@@ -14,8 +14,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @Entity(name = "videos")
 public class Video {
-    @Id
-    @Column(nullable = false)
+    @Id @Column(nullable = false)
     private String hash;
 
     @Column(nullable = false)
@@ -30,7 +29,6 @@ public class Video {
     @Column(nullable = false)
     private int duration; // in seconds
 
-    @Column(nullable = false)
     private String url;
 
     public boolean invalid() {
@@ -38,7 +36,6 @@ public class Video {
                 name == null || name.isBlank() ||
                 author == null || author.isBlank() ||
                 creationYear < 1970 ||
-                duration <= 0 ||
-                url == null || url.isBlank();
+                duration <= 0;
     }
 }

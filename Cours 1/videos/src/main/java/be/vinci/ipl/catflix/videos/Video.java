@@ -21,8 +21,7 @@ public class Video {
         return hash == null || hash.isBlank() ||
                 name == null || name.isBlank() ||
                 author == null || author.isBlank() ||
-                creationYear <= 1970 ||
-                duration <= 0 ||
-                url == null || url.isBlank();
+                creationYear < 1970 ||
+                duration <= 0;
     }
 }

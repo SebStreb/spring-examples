@@ -11,6 +11,7 @@ public class VideosService {
         this.repository = repository;
     }
 
+
     /**
      * Creates a video in repository
      * @param video the video to create
@@ -21,6 +22,7 @@ public class VideosService {
         repository.save(video);
         return true;
     }
+
 
     /**
      * Reads all videos in repository
@@ -40,6 +42,16 @@ public class VideosService {
     }
 
     /**
+     * Reads all videos from an author
+     * @param author the author of the videos
+     * @return all videos from this author
+     */
+    public Iterable<Video> readFromAuthor(String author) {
+        return repository.findByAuthor(author);
+    }
+
+
+    /**
      * Updates a video in repository
      * @param video the new values of the video
      * @return true if the video was updated, or false if the video couldn't be found
@@ -49,6 +61,7 @@ public class VideosService {
         repository.save(video);
         return true;
     }
+
 
     /**
      * Deletes all videos from repository
@@ -66,15 +79,6 @@ public class VideosService {
         if (!repository.existsById(hash)) return false;
         repository.deleteById(hash);
         return true;
-    }
-
-    /**
-     * Reads all videos from an author
-     * @param author the author of the videos
-     * @return all videos from this author
-     */
-    public Iterable<Video> readFromAuthor(String author) {
-        return repository.findByAuthor(author);
     }
 
     /**

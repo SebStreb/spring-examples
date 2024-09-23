@@ -1,20 +1,20 @@
 openapi: 3.0.3
 info:
-  title: Catflix video service
-  description: Microservice handling database of videos in Catflix project
+  title: Catflix Video Service
+  description: Microservice de gestion des vidéos pour le projet Catflix. Permet de créer, lire, modifier et supprimer des vidéos, ainsi que de lister toutes les vidéos ou toutes les vidéos d'un certain auteur.
   version: 1.0.0
 servers:
-  - url: http://localhost:9001
+  - url: http://localhost:8080
     description: Development server
 paths:
 
   /videos:
 
     get:
-      summary: Read all videos
+      summary: Lire toutes les vidéos
       responses:
         200:
-          description: Returned list of videos
+          description: Retourne la liste de toutes les vidéos
           content:
             'application/json':
               schema:
@@ -23,89 +23,89 @@ paths:
                   $ref: '#/components/schemas/video'
 
     delete:
-      summary: Delete all videos
+      summary: Supprimer toutes les vidéos
       responses:
         200:
-          description: All videos are deleted
+          description: Toutes les vidéos ont été supprimées
 
 
   /videos/{hash}:
     parameters:
       - name: hash
         in: path
-        description: Hash of the video
+        description: Hash de la vidéo
         required: true
         schema:
           type: string
           example: dQw4w9WgXcQ
 
     post:
-      summary: Create a video
+      summary: Créer une vidéo
       requestBody:
-        description: Video to create
+        description: Données de la vidéo à créer
         content:
           'application/json':
             schema:
               $ref: '#/components/schemas/video'
       responses:
         400:
-          description: Hash does not match or video invalid
+          description: Le hash en paramètre ne correspond pas au hash dans les données de la vidéo, ou les données ne correspondent pas à ce qui serait attendu
         409:
-          description: Video already exists
+          description: Une vidéo existe déjà avec ce hash
         201:
-          description: Created video
+          description: La vidéo a été créée
 
     get:
-      summary: Read a video
+      summary: Lire une vidéo sur base de son hash
       responses:
         404:
-          description: Video not found
+          description: Aucune vidéo n'a été trouvée pour ce hash
         200:
-          description: Returned video
+          description: Retourne les données de la vidéo correspondante
           content:
             'application/json':
               schema:
                 $ref: '#/components/schemas/video'
 
     put:
-      summary: Update a video
+      summary: Modifier une video sur base de son hash
       requestBody:
-        description: New values of the video
+        description: Nouvelles données de la vidéo à modifier
         content:
           'application/json':
             schema:
               $ref: '#/components/schemas/video'
       responses:
         400:
-          description: Hash does not match or video invalid
+          description: Le hash en paramètre ne correspond pas au hash dans les données de la vidéo, ou les données ne correspondent pas à ce qui serait attendu
         404:
-          description: Video not found
+          description: Aucune vidéo n'a été trouvée pour ce hash
         200:
-          description: Updated video
+          description: La vidéo a été modifiée
 
     delete:
-      summary: Delete a video
+      summary: Supprimer une vidéo sur base de son hash
       responses:
         404:
-          description: Video not found
+          description: Aucune vidéo n'a été trouvée pour ce hash
         200:
-          description: Deleted video
+          description: La vidéo a été supprimée
 
   /videos/user/{author}:
     parameters:
       - name: author
         in: path
         required: true
-        description: Author of the videos
+        description: Auteur de la vidéo
         schema:
           type: string
           example: Cat4Life
 
     get:
-      summary: Read all videos from an author
+      summary: Lire toutes les vidéos d'un certain auteur
       responses:
         200:
-          description: Returned list of videos
+          description: Retourne la liste de toutes les vidéos de cet auteur
           content:
             'application/json':
               schema:
@@ -114,10 +114,10 @@ paths:
                   $ref: '#/components/schemas/video'
 
     delete:
-      summary: Delete all videos from an author
+      summary: Supprimer toutes les vidéos d'un certain auteur
       responses:
         200:
-          description: Deleted videos
+          description: Toutes les vidéos de cet auteur ont été supprimées
 
 
 components:
@@ -127,17 +127,22 @@ components:
       properties:
         hash:
           type: string
+          description: Hash de la vidéo
         name:
           type: string
+          description: Nom de la vidéo
         author:
           type: string
+          description: Auteur de la vidéo
         creationYear:
           type: integer
+          description: Année de création de la vidéo
         duration:
           type: integer
-          description: in seconds
+          description: Durée de la vidéo, en secondes
         url:
           type: string
+          description: URL de la vidéo
       example:
         hash: dQw4w9WgXcQ
         name: Cutest kitty ever
