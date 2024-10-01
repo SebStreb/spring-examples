@@ -1,21 +1,14 @@
 package be.vinci.ipl.catflix.users;
 
-import be.vinci.ipl.catflix.users.repositories.ReviewsProxy;
-import be.vinci.ipl.catflix.users.repositories.UsersRepository;
-import be.vinci.ipl.catflix.users.repositories.VideosProxy;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UsersService {
 
     private final UsersRepository repository;
-    private final ReviewsProxy reviewsProxy;
-    private final VideosProxy videosProxy;
 
-    public UsersService(UsersRepository repository, ReviewsProxy reviewsProxy, VideosProxy videosProxy) {
+    public UsersService(UsersRepository repository) {
         this.repository = repository;
-        this.reviewsProxy = reviewsProxy;
-        this.videosProxy = videosProxy;
     }
 
     /**
@@ -50,16 +43,12 @@ public class UsersService {
     }
 
     /**
-     * Deletes a user from repository and all reviews and videos associated with it
+     * Deletes a user from repository and all reviews associated with it
      * @param pseudo the pseudo of the user
      * @return true if the user was deleted, or false if the user couldn't be found
      */
     public boolean deleteOne(String pseudo) {
         if (!repository.existsById(pseudo)) return false;
-
-        reviewsProxy.deleteFromUser(pseudo);
-        videosProxy.deleteFromUser(pseudo);
-
         repository.deleteById(pseudo);
         return true;
     }

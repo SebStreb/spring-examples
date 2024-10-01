@@ -1,0 +1,25 @@
+### Create user
+POST http://localhost:8080/users/ShadowFox
+Content-Type: application/json
+
+{
+  "pseudo": "ShadowFox",
+  "firstname": "Élise",
+  "lastname": "Moreau"
+}
+
+### Read user
+GET http://localhost:8080/users/ShadowFox
+
+### Update user
+PUT http://localhost:8080/users/ShadowFox
+Content-Type: application/json
+
+{
+  "pseudo": "ShadowFox",
+  "firstname": "Élise",
+  "lastname": "Durand"
+}
+
+### Delete user
+DELETE http://localhost:8080/users/ShadowFox

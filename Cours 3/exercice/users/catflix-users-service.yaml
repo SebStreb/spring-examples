@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
-  title: Catflix Users Service
-  description: Microservice de gestion des utilisateurs pour le projet Catflix. Permet de créer, lire, modifier et supprimer des utilisateurs.
+  title: Users Service
+  description: Microservice de gestion des utilisateurs pour un projet générique. Permet de créer, lire, modifier et supprimer des utilisateurs.
   version: 1.0.0
 servers:
-  - url: http://localhost:9002
+  - url: http://localhost:8080
     description: Development server
 paths:
 
@@ -14,7 +14,7 @@ paths:
         in: path
         schema:
           type: string
-        example: PetWard
+        example: Hunter2
         description: Pseudo de l'utilisateur
 
     post:
@@ -62,12 +62,12 @@ paths:
           description: L'utilisateur a été modifié
 
     delete:
-      summary: Supprimer un utilisateur sur base de son pseudo et toutes les reviews et vidéos associées
+      summary: Supprimer un utilisateur sur base de son pseudo
       responses:
         404:
           description: Aucun utilisateur n'a été trouvé pour ce pseudo
         200:
-          description: L'utilisateur a été supprimé, ainsi que toutes les reviews et vidéos associées
+          description: L'utilisateur a été supprimé
 
 components:
   schemas:
@@ -84,6 +84,6 @@ components:
           type: string
           description: Nom de l'utilisateur
       example:
-        pseudo: PetWard
-        firstname: Marine
-        lastname: Pelland
+        pseudo: Hunter2
+        firstname: Clara
+        lastname: Dubois

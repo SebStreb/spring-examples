@@ -9,8 +9,8 @@
         <outputRelativeToContentRoot value="true" />
         <module name="videos" />
         <module name="reviews" />
-        <module name="eureka" />
         <module name="users" />
+        <module name="eureka" />
       </profile>
     </annotationProcessing>
   </component>

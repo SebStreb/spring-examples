@@ -1,4 +1,4 @@
-package be.vinci.ipl.catflix.videos;
+package be.vinci.ipl.catflix.videos.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,16 +8,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDate;
-
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @Entity(name = "videos")
 public class Video {
-    @Id
-    @Column(nullable = false)
+    @Id @Column(nullable = false)
     private String hash;
 
     @Column(nullable = false)
@@ -32,15 +29,13 @@ public class Video {
     @Column(nullable = false)
     private int duration; // in seconds
 
-    @Column(nullable = false)
     private String url;
 
     public boolean invalid() {
         return hash == null || hash.isBlank() ||
                 name == null || name.isBlank() ||
                 author == null || author.isBlank() ||
-                creationYear < 1970 || creationYear > LocalDate.now().getYear() ||
-                duration <= 0 ||
-                url == null || url.isBlank();
+                creationYear < 1970 ||
+                duration <= 0;
     }
 }

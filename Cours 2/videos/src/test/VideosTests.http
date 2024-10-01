@@ -11,11 +11,16 @@ Content-Type: application/json
   "url": "https://www.youtube.com/watch?v=zJXRCeM5UEs"
 }
 
+
 ### Read all
 GET http://localhost:8080/videos
 
 ### Read one
 GET http://localhost:8080/videos/dQw4w9WgXcQ
+
+### Read from author
+GET http://localhost:8080/videos/user/Rick Astley
+
 
 ### Update one
 PUT http://localhost:8080/videos/dQw4w9WgXcQ
@@ -30,14 +35,12 @@ Content-Type: application/json
   "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 }
 
+
 ### Delete all
 DELETE http://localhost:8080/videos
 
 ### Delete one
 DELETE http://localhost:8080/videos/zJXRCeM5UEs
-
-### Read from author
-GET http://localhost:8080/videos/user/Rick Astley
 
 ### Delete from author
 DELETE http://localhost:8080/videos/user/Rick Astley

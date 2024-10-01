@@ -1,17 +1,16 @@
 package be.vinci.ipl.catflix.reviews.repositories;
 
-import be.vinci.ipl.catflix.reviews.models.Video;
+import be.vinci.ipl.catflix.reviews.models.User;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @Repository
-@FeignClient(name = "videos")
-public interface VideosProxy {
+@FeignClient(name = "users")
+public interface UsersProxy {
 
-    @GetMapping("/videos/{hash}")
-    Video readOne(@PathVariable String hash);
+    @GetMapping("/users/{pseudo}")
+    User readOne(@PathVariable String pseudo);
 
 }
