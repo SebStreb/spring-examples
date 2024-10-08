@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
-  title: Catflix users service
-  description: Microservice handling users database in Catflix project
+  title: Catflix Users Service
+  description: Microservice de gestion des utilisateurs pour le projet Catflix. Permet de créer, lire, modifier et supprimer des utilisateurs.
   version: 1.0.0
 servers:
   - url: http://localhost:9002
@@ -15,59 +15,59 @@ paths:
         schema:
           type: string
         example: PetWard
-        description: Pseudo of the user
+        description: Pseudo de l'utilisateur
 
     post:
-      summary: Create a user
+      summary: Créer un utilisateur avec ses identifiants
       requestBody:
-        description: User to create
+        description: Données de l'utilisateur à créer
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/user'
+              $ref: '#/components/schemas/userWithCredentials'
       responses:
         400:
-          description: Pseudo does not match or user invalid
+          description: Le pseudo en paramètre ne correspond pas au pseudo dans les données de l'utilisateur, ou les données ne correspondent pas à ce qui serait attendu
         409:
-          description: Pseudo already used
+          description: Un utilisateur existe déjà avec ce pseudo
         201:
-          description: User created
+          description: L'utilisateur et ses identifiants ont été créés
 
     get:
-      summary: Read a user
+      summary: Lire un utilisateur sur base de son pseudo
       responses:
         404:
-          description: User not found
+          description: Aucun utilisateur n'a été trouvé pour ce pseudo
         200:
-          description: Found user
+          description: Retourne les données de l'utilisateur correspondant
           content:
             'application/json':
               schema:
                 $ref: '#/components/schemas/user'
 
     put:
-      summary: Update a user
+      summary: Modifier un utilisateur et ses identifiants sur base de son pseudo
       requestBody:
-        description: New values of the user
+        description: Nouvelles données de l'utilisateur
         content:
           'application/json':
             schema:
-              $ref: '#/components/schemas/user'
+              $ref: '#/components/schemas/userWithCredentials'
       responses:
         400:
-          description: Pseudo does not match or user invalid
+          description: Le pseudo en paramètre ne correspond pas au pseudo dans les données de l'utilisateur, ou les données ne correspondent pas à ce qui serait attendu
         404:
-          description: User not found
+          description: Aucun utilisateur n'a été trouvé pour ce pseudo
         200:
-          description: User updated
+          description: L'utilisateur et ses identifiants ont été modifiés
 
     delete:
-      summary: Delete a user
+      summary: Supprimer un utilisateur et ses identifiants sur base de son pseudo et toutes les reviews et vidéos associées
       responses:
         404:
-          description: User not found
+          description: Aucun utilisateur n'a été trouvé pour ce pseudo
         200:
-          description: User deleted
+          description: L'utilisateur et ses identifiants ont été supprimés, ainsi que toutes les reviews et vidéos associées
 
 components:
   schemas:
@@ -76,11 +76,33 @@ components:
       properties:
         pseudo:
           type: string
+          description: Pseudo de l'utilisateur
         firstname:
           type: string
+          description: Prénom de l'utilisateur
         lastname:
           type: string
+          description: Nom de l'utilisateur
       example:
         pseudo: PetWard
         firstname: Marine
         lastname: Pelland
+    userWithCredentials:
+      properties:
+        pseudo:
+          type: string
+          description: Pseudo de l'utilisateur
+        firstname:
+          type: string
+          description: Prénom de l'utilisateur
+        lastname:
+          type: string
+          description: Nom de l'utilisateur
+        password:
+          type: string
+          description: Mot de passe de l'utilisateur
+      example:
+        pseudo: PetWard
+        firstname: Marine
+        lastname: Pelland
+        password: password123

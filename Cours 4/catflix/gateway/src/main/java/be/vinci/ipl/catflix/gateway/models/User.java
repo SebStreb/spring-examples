@@ -6,7 +6,6 @@ import lombok.*;
 @Setter
 @ToString
 @NoArgsConstructor
-@AllArgsConstructor
 public class User {
     private String pseudo;
     private String firstname;

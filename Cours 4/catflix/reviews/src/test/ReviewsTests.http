@@ -1,5 +1,5 @@
 ### Create review
-POST http://localhost:9003/reviews/Cat4Life/JxS5E-kZc2s
+POST http://localhost:9003/reviews/users/Cat4Life/videos/JxS5E-kZc2s
 Content-Type: application/json
 
 {
@@ -10,10 +10,10 @@ Content-Type: application/json
 }
 
 ### Read review
-GET http://localhost:9003/reviews/Cat4Life/JxS5E-kZc2s
+GET http://localhost:9003/reviews/users/Cat4Life/videos/JxS5E-kZc2s
 
 ### Update review
-PUT http://localhost:9003/reviews/pettier/dQw4w9WgXcQ
+PUT http://localhost:9003/reviews/users/pettier/videos/dQw4w9WgXcQ
 Content-Type: application/json
 
 {
@@ -24,21 +24,21 @@ Content-Type: application/json
 }
 
 ### Delete review
-DELETE http://localhost:9003/reviews/Cat4Life/JxS5E-kZc2s
+DELETE http://localhost:9003/reviews/users/Cat4Life/videos/JxS5E-kZc2s
 
 
 ### Read reviews from user
-GET http://localhost:9003/reviews/user/Cat4Life
+GET http://localhost:9003/reviews/users/pettier
 
 ### Delete reviews from user
-DELETE http://localhost:9003/reviews/user/Cat4Life
+DELETE http://localhost:9003/reviews/users/Cat4Life
 
 
 ### Read reviews of video
-GET http://localhost:9003/reviews/video/dQw4w9WgXcQ
+GET http://localhost:9003/reviews/videos/dQw4w9WgXcQ
 
 ### Delete reviews of video
-DELETE http://localhost:9003/reviews/video/dQw4w9WgXcQ
+DELETE http://localhost:9003/reviews/videos/dQw4w9WgXcQ
 
 
 ### Read best videos

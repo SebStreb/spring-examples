@@ -5,6 +5,7 @@ import be.vinci.ipl.catflix.reviews.models.Video;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Objects;
 
@@ -17,73 +18,75 @@ public class ReviewsController {
         this.service = service;
     }
 
-    @PostMapping("/reviews/{pseudo}/{hash}")
+    @PostMapping("/reviews/users/{pseudo}/videos/{hash}")
     public ResponseEntity<Void> createOne(@PathVariable String pseudo, @PathVariable String hash, @RequestBody Review review) {
         if (!Objects.equals(review.getPseudo(), pseudo) || !Objects.equals(review.getHash(), hash)) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-        if (review.invalid()) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (review.invalid()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if (service.userNotExists(pseudo) || service.videoNotExists(hash)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
 
         boolean created = service.createOne(review);
-
-        if (!created) return new ResponseEntity<>(HttpStatus.CONFLICT);
+        if (!created) throw new ResponseStatusException(HttpStatus.CONFLICT);
         else return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @GetMapping("/reviews/{pseudo}/{hash}")
-    public ResponseEntity<Review> readOne(@PathVariable String pseudo, @PathVariable String hash) {
+
+    @GetMapping("/reviews/users/{pseudo}/videos/{hash}")
+    public Review readOne(@PathVariable String pseudo, @PathVariable String hash) {
         Review review = service.readOne(pseudo, hash);
 
-        if (review == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(review, HttpStatus.OK);
+        if (review == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        else return review;
     }
 
-    @PutMapping("/reviews/{pseudo}/{hash}")
-    public ResponseEntity<Void> updateOne(@PathVariable String pseudo, @PathVariable String hash, @RequestBody Review review) {
-        if (!Objects.equals(review.getPseudo(), pseudo) || !Objects.equals(review.getHash(), hash)) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        if (review.invalid()) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
-        boolean updated = service.updateOne(review);
-
-        if (!updated) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @DeleteMapping("/reviews/{pseudo}/{hash}")
-    public ResponseEntity<Void>  deleteOne(@PathVariable String pseudo, @PathVariable String hash) {
-        boolean deleted = service.deleteOne(pseudo, hash);
-
-        if (!deleted) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @GetMapping("/reviews/user/{pseudo}")
+    @GetMapping("/reviews/users/{pseudo}")
     public Iterable<Review> readFromUser(@PathVariable String pseudo) {
         return service.readFromUser(pseudo);
     }
 
-    @DeleteMapping("/reviews/user/{pseudo}")
-    public void deleteFromUser(@PathVariable String pseudo) {
-        service.deleteFromUser(pseudo);
-    }
-
-
-    @GetMapping("/reviews/video/{hash}")
+    @GetMapping("/reviews/videos/{hash}")
     public Iterable<Review> readFromVideo(@PathVariable String hash) {
         return service.readFromVideo(hash);
     }
 
-    @DeleteMapping("/reviews/video/{hash}")
-    public void deleteFromVideo(@PathVariable String hash) {
-        service.deleteFromVideo(hash);
-    }
-
-
     @GetMapping("/reviews/best")
     public Iterable<Video> readBest() {
         return service.best3Videos();
+    }
+
+
+    @PutMapping("/reviews/users/{pseudo}/videos/{hash}")
+    public void updateOne(@PathVariable String pseudo, @PathVariable String hash, @RequestBody Review review) {
+        if (!Objects.equals(review.getPseudo(), pseudo) || !Objects.equals(review.getHash(), hash)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        if (review.invalid()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if (service.userNotExists(pseudo) || service.videoNotExists(hash)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+
+        boolean updated = service.updateOne(review);
+        if (!updated) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+
+    @DeleteMapping("/reviews/users/{pseudo}/videos/{hash}")
+    public void deleteOne(@PathVariable String pseudo, @PathVariable String hash) {
+        boolean deleted = service.deleteOne(pseudo, hash);
+        if (!deleted) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    @DeleteMapping("/reviews/users/{pseudo}")
+    public void deleteFromUser(@PathVariable String pseudo) {
+        service.deleteFromUser(pseudo);
+    }
+
+    @DeleteMapping("/reviews/videos/{hash}")
+    public void deleteFromVideo(@PathVariable String hash) {
+        service.deleteFromVideo(hash);
     }
 
 }

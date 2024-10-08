@@ -1,3 +1,10 @@
 package be.vinci.ipl.catflix.gateway.exceptions;
 
-public class ConflictException extends Exception {}
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+public class ConflictException extends ResponseStatusException {
+    public ConflictException() {
+        super(HttpStatus.CONFLICT);
+    }
+}

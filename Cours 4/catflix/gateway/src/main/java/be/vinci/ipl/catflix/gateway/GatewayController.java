@@ -1,13 +1,10 @@
 package be.vinci.ipl.catflix.gateway;
 
-import be.vinci.ipl.catflix.gateway.exceptions.BadRequestException;
-import be.vinci.ipl.catflix.gateway.exceptions.ConflictException;
-import be.vinci.ipl.catflix.gateway.exceptions.NotFoundException;
-import be.vinci.ipl.catflix.gateway.exceptions.UnauthorizedException;
 import be.vinci.ipl.catflix.gateway.models.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Objects;
 
@@ -22,87 +19,49 @@ public class GatewayController {
 
 
     @PostMapping("/auth")
-    public ResponseEntity<String> connect(@RequestBody Credentials credentials) {
-        try {
-            String token = service.connect(credentials);
-            return new ResponseEntity<>(token, HttpStatus.OK);
-        } catch (BadRequestException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (UnauthorizedException e) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+    public String connect(@RequestBody Credentials credentials) {
+        return service.connect(credentials); // throws BadRequestException & UnauthorizedException
     }
 
 
     @PostMapping("/users/{pseudo}")
     public ResponseEntity<Void> createUser(@PathVariable String pseudo, @RequestBody UserWithCredentials user) {
-        if (!Objects.equals(user.getPseudo(), pseudo)) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (!Objects.equals(user.getPseudo(), pseudo)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        try {
-            service.createUser(user);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (BadRequestException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (ConflictException e) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
+        service.createUser(user); // throws BadRequestException & ConflictException
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/users/{pseudo}")
-    public ResponseEntity<User> readUser(@PathVariable String pseudo) {
-        User user = service.readUser(pseudo);
-
-        if (user == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(user, HttpStatus.OK);
+    public User readUser(@PathVariable String pseudo) {
+        return service.readUser(pseudo); // throws NotFoundException
     }
 
     @PutMapping("/users/{pseudo}")
-    public ResponseEntity<Void> updateUser(@PathVariable String pseudo,
-                                           @RequestBody UserWithCredentials user,
-                                           @RequestHeader("Authorization") String token) {
-        if (!Objects.equals(user.getPseudo(), pseudo)) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    public void updateUser(@PathVariable String pseudo, @RequestBody UserWithCredentials user, @RequestHeader("Authorization") String token) {
+        if (!Objects.equals(user.getPseudo(), pseudo)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        String userPseudo = service.verify(token);
-        if (userPseudo == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        else if (!Objects.equals(userPseudo, pseudo)) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        service.verify(token, pseudo); // throws UnauthorizedException & ForbiddenException
 
-        try {
-            service.updateUser(user);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (BadRequestException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        service.updateUser(user); // throws BadRequestException & NotFoundException
     }
 
     @DeleteMapping("/users/{pseudo}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String pseudo, @RequestHeader("Authorization") String token) {
-        String user = service.verify(token);
-        if (user == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        else if (!Objects.equals(user, pseudo)) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    public void deleteUser(@PathVariable String pseudo, @RequestHeader("Authorization") String token) {
+        service.verify(token, pseudo); // throws UnauthorizedException & ForbiddenException
 
-        boolean found = service.deleteUser(pseudo);
-
-        if (!found) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(HttpStatus.OK);
+        service.deleteUser(pseudo); // throws NotFoundException
     }
 
 
     @GetMapping("/users/{pseudo}/videos")
-    public ResponseEntity<Iterable<Video>> readUserVideos(@PathVariable String pseudo) {
-        Iterable<Video> videos = service.readVideosFromUser(pseudo);
-
-        if (videos == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(videos, HttpStatus.OK);
+    public Iterable<Video> readUserVideos(@PathVariable String pseudo) {
+        return service.readVideosFromUser(pseudo);
     }
 
     @GetMapping("/users/{pseudo}/reviews")
-    public ResponseEntity<Iterable<Review>> readUserReviews(@PathVariable String pseudo) {
-        Iterable<Review> reviews = service.readReviewsFromUser(pseudo);
-
-        if (reviews == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(reviews, HttpStatus.OK);
+    public Iterable<Review> readUserReviews(@PathVariable String pseudo) {
+        return service.readReviewsFromUser(pseudo);
     }
 
 
@@ -119,152 +78,77 @@ public class GatewayController {
 
 
     @PostMapping("/videos/{hash}")
-    public ResponseEntity<Void> createVideo(@PathVariable String hash,
-                                            @RequestBody Video video,
-                                            @RequestHeader("Authorization") String token) {
-        if (!Objects.equals(video.getHash(), hash)) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Void> createVideo(@PathVariable String hash, @RequestBody Video video, @RequestHeader("Authorization") String token) {
+        if (!Objects.equals(video.getHash(), hash)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        String user = service.verify(token);
-        if (user == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        else if (!Objects.equals(video.getAuthor(), user)) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        service.verify(token, video.getAuthor()); // throws UnauthorizedException & ForbiddenException
 
-        try {
-            service.createVideo(video);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (BadRequestException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (ConflictException e) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-
+        service.createVideo(video); // throws BadRequestException & ConflictException
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/videos/{hash}")
-    public ResponseEntity<Video> readVideo(@PathVariable String hash) {
-        Video video = service.readVideo(hash);
-
-        if (video == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(video, HttpStatus.OK);
+    public Video readVideo(@PathVariable String hash) {
+        return service.readVideo(hash); // throws NotFoundException
     }
 
     @PutMapping("/videos/{hash}")
-    public ResponseEntity<Void> updateVideo(@PathVariable String hash,
-                                            @RequestBody Video video,
-                                            @RequestHeader("Authorization") String token) {
-        if (!Objects.equals(video.getHash(), hash)) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    public void updateVideo(@PathVariable String hash, @RequestBody Video video, @RequestHeader("Authorization") String token) {
+        if (!Objects.equals(video.getHash(), hash)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        String user = service.verify(token);
-        if (user == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        else if (!Objects.equals(video.getAuthor(), user)) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        service.verify(token, video.getAuthor()); // throws UnauthorizedException & ForbiddenException
 
-        try {
-            service.updateVideo(video);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (BadRequestException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        service.updateVideo(video); // throws BadRequestException & NotFoundException
     }
 
     @DeleteMapping("/videos/{hash}")
-    public ResponseEntity<Void> deleteVideo(@PathVariable String hash, @RequestHeader("Authorization") String token) {
-        Video video = service.readVideo(hash);
-        if (video == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public void deleteVideo(@PathVariable String hash, @RequestHeader("Authorization") String token) {
+        Video video = service.readVideo(hash); // throws NotFoundException
+        service.verify(token, video.getAuthor()); // throws UnauthorizedException & ForbiddenException
 
-        String user = service.verify(token);
-        if (user == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        else if (!Objects.equals(video.getAuthor(), user)) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-
-        boolean found = service.deleteVideo(hash);
-
-        if (!found) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(HttpStatus.OK);
+        service.deleteVideo(hash); // throws NotFoundException
     }
 
 
     @GetMapping("/videos/{hash}/reviews")
-    public ResponseEntity<Iterable<Review>> readVideoReviews(@PathVariable String hash) {
-        Iterable<Review> reviews = service.readReviewsOfVideo(hash);
-
-        if (reviews == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(reviews, HttpStatus.OK);
+    public Iterable<Review> readVideoReviews(@PathVariable String hash) {
+        return service.readReviewsOfVideo(hash);
     }
 
 
-    @PostMapping("/reviews/{pseudo}/{hash}")
-    public ResponseEntity<Void> createReview(@PathVariable String pseudo,
-                                             @PathVariable String hash,
-                                             @RequestBody Review review,
-                                             @RequestHeader("Authorization") String token) {
+    @PostMapping("/reviews/users/{pseudo}/videos/{hash}")
+    public ResponseEntity<Void> createReview(@PathVariable String pseudo, @PathVariable String hash, @RequestBody Review review, @RequestHeader("Authorization") String token) {
         if (!Objects.equals(review.getPseudo(), pseudo) || !Objects.equals(review.getHash(), hash)) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
-        String user = service.verify(token);
-        if (user == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        else if (!Objects.equals(review.getPseudo(), user)) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        service.verify(token, pseudo); // throws UnauthorizedException & ForbiddenException
 
-        try {
-            service.createReview(review);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (BadRequestException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (ConflictException e) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
+        service.createReview(review); // throws BadRequestException & ConflictException
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @GetMapping("/reviews/{pseudo}/{hash}")
-    public ResponseEntity<Review> readReview(@PathVariable String pseudo, @PathVariable String hash) {
-        Review review = service.readReview(pseudo, hash);
-
-        if (review == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(review, HttpStatus.OK);
+    @GetMapping("/reviews/users/{pseudo}/videos/{hash}")
+    public Review readReview(@PathVariable String pseudo, @PathVariable String hash) {
+        return service.readReview(pseudo, hash); // throws NotFoundException
     }
 
-    @PutMapping("/reviews/{pseudo}/{hash}")
-    public ResponseEntity<Void> updateReview(@PathVariable String pseudo,
-                                             @PathVariable String hash,
-                                             @RequestBody Review review,
-                                             @RequestHeader("Authorization") String token) {
+    @PutMapping("/reviews/users/{pseudo}/videos/{hash}")
+    public void updateReview(@PathVariable String pseudo, @PathVariable String hash, @RequestBody Review review, @RequestHeader("Authorization") String token) {
         if (!Objects.equals(review.getPseudo(), pseudo) || !Objects.equals(review.getHash(), hash)) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
-        String user = service.verify(token);
-        if (user == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        else if (!Objects.equals(review.getPseudo(), user)) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        service.verify(token, pseudo); // throws UnauthorizedException & ForbiddenException
 
-        try {
-            service.updateReview(review);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (BadRequestException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        service.updateReview(review); // throws BadRequestException & NotFoundException
     }
 
-    @DeleteMapping("/reviews/{pseudo}/{hash}")
-    public ResponseEntity<Void> deleteReview(@PathVariable String pseudo,
-                                             @PathVariable String hash,
-                                             @RequestHeader("Authorization") String token) {
-        Review review = service.readReview(pseudo, hash);
-        if (review == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    @DeleteMapping("/reviews/users/{pseudo}/videos/{hash}")
+    public void deleteReview(@PathVariable String pseudo, @PathVariable String hash, @RequestHeader("Authorization") String token) {
+        service.verify(token, pseudo); // throws UnauthorizedException & ForbiddenException
 
-        String user = service.verify(token);
-        if (user == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        else if (!review.getPseudo().equals(user)) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-
-        boolean found = service.deleteReview(pseudo, hash);
-
-        if (!found) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(HttpStatus.OK);
+        service.deleteReview(pseudo, hash); // throws NotFoundException
     }
 
 }

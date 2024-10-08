@@ -1,3 +1,10 @@
 package be.vinci.ipl.catflix.gateway.exceptions;
 
-public class UnauthorizedException extends Exception {}
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+public class UnauthorizedException extends ResponseStatusException {
+    public UnauthorizedException() {
+        super(HttpStatus.UNAUTHORIZED);
+    }
+}

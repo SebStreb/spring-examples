@@ -1,17 +1,15 @@
-package be.vinci.ipl.catflix.users;
+package be.vinci.ipl.catflix.users.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity(name = "users")
 public class User {
     @Id
@@ -23,10 +21,4 @@ public class User {
 
     @Column(nullable = false)
     private String lastname;
-
-    public boolean invalid() {
-        return pseudo == null || pseudo.isBlank() ||
-                firstname == null || firstname.isBlank() ||
-                lastname == null || lastname.isBlank();
-    }
 }

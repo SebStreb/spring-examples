@@ -1,94 +1,94 @@
 openapi: 3.0.3
 info:
-  title: Catflix review service
-  description: Microservice handling database of reviews in project Catflix
+  title: Catflix Reviews Service
+  description: Microservice de gestion des reviews pour le projet Catflix. Permet de créer, lire, modifier et supprimer des reviews, ainsi que de lister toutes les reviews d'un certain utilisateur ou d'une certaine vidéo, et de lister les 3 vidéos les mieux notées.
   version: 1.0.0
 servers:
   - url: http://localhost:9003
     description: Development server
 paths:
 
-  /reviews/{pseudo}/{hash}:
+  /reviews/users/{pseudo}/videos/{hash}:
     parameters:
       - name: pseudo
         in: path
         required: true
-        description: Pseudo of the user
+        description: Pseudo de l'utilisateur
         schema:
           type: string
       - name: hash
         in: path
         required: true
-        description: Hash of the video
+        description: Hash de la vidéo
         schema:
           type: string
 
     post:
-      summary: Create new review
+      summary: Créer une nouvelle review d'un utilisateur pour une vidéo
       requestBody:
-        description: Review to create
+        description: Données de la review à créer
         content:
           'application/json':
             schema:
               $ref: '#/components/schemas/review'
       responses:
         400:
-          description: Pseudo and/or hash does not match, or review invalid
+          description: Le pseudo et/ou le hash en paramètre ne correspondent pas aux données de la review, ou aucun utilisateur n'existe pour ce pseudo, ou aucune vidéo n'existe pour ce hash, ou les données ne correspondent pas à ce qui serait attendu
         409:
-          description: Review already exists
+          description: Une review existe déjà pour cet utilisateur et cette vidéo
         201:
-          description: Review created
+          description: La review a été créée
 
     get:
-      summary: Read review
+      summary: Lire une review sur base d'un utilisateur et d'une vidéo
       responses:
         404:
-          description: Review not found
+          description: Aucune review n'a été trouvée pour cet utilisateur et cette vidéo
         200:
-          description: Review found
+          description: Retourne la review de cet utilisateur pour cette vidéo
           content:
             'application/json':
               schema:
                 $ref: '#/components/schemas/review'
 
     put:
-      summary: Update review
+      summary: Modifier une review sur base d'un utilisateur et d'une vidéo
       requestBody:
-        description: New values of the review
+        description: Nouvelles données de la review
         content:
           'application/json':
             schema:
               $ref: '#/components/schemas/review'
       responses:
         400:
-          description: Pseudo and/or hash does not match, or review invalid
+          description: Le pseudo et/ou le hash en paramètre ne correspondent pas aux données de la review, ou les données ne correspondent pas à ce qui serait attendu
         404:
-          description: Review not found
+          description: Aucune review n'a été trouvée pour cet utilisateur et cette vidéo
         200:
-          description: Review updated
+          description: La review a été modifiée
 
     delete:
-      summary: Delete review
+      summary: Supprimer une review sur base d'un utilisateur et d'une vidéo
       responses:
         404:
-          description: Review not found
+          description: Aucune review n'a été trouvée pour cet utilisateur et cette vidéo
         200:
-          description: Review deleted
+          description: La review a été supprimée
 
-  /reviews/user/{pseudo}:
+  /reviews/users/{pseudo}:
     parameters:
       - name: pseudo
         in: path
         required: true
-        description: Pseudo of the user
+        description: Pseudo de l'utilisateur
         schema:
           type: string
 
     get:
-      summary: Find reviews from a user
+      summary: Lire les reviews d'un utilisateur
       responses:
         200:
-          description:  Reviews from the user
+          description: Retourne la liste de toutes les reviews de cet utilisateur
           content:
             'application/json':
               schema:
@@ -97,25 +97,25 @@ paths:
                   $ref: '#/components/schemas/review'
 
     delete:
-      summary: Delete reviews from a user
+      summary: Supprimer les reviews d'un utilisateur
       responses:
         200:
-          description: Reviews deleted
+          description: Toutes les reviews de cet utilisateur ont été supprimées
 
-  /reviews/video/{hash}:
+  /reviews/videos/{hash}:
     parameters:
       - name: hash
         in: path
         required: true
-        description: Hash of the video
+        description: Hash de la vidéo
         schema:
           type: string
 
     get:
-      summary: Find reviews of a video
+      summary: Lire les reviews d'une vidéo
       responses:
         200:
-          description: Reviews of the video
+          description: Retourne la liste de toutes les reviews de cette vidéo
           content:
             'application/json':
               schema:
@@ -124,17 +124,17 @@ paths:
                   $ref: '#/components/schemas/review'
 
     delete:
-      summary: Delete reviews of a video
+      summary: Supprimer les reviews d'une vidéo
       responses:
         200:
-          description: Reviews deleted
+          description: Toutes les reviews de cette vidéo ont été supprimées
 
   /reviews/best:
     get:
-      summary: Find the best 3 videos
+      summary: Lire les 3 vidéos les mieux notées
       responses:
         200:
-          description: Highest rated videos by the users
+          description: Retourne une liste ordonnée des 3 vidéos ayant les moyennes de note de reviews les plus élevées
           content:
             'application/json':
               schema:
@@ -151,12 +151,16 @@ components:
       properties:
         pseudo:
           type: string
+          description: Pseudo de l'utilisateur
         hash:
           type: string
+          description: Hash de la vidéo
         rating:
           type: number
+          description: Note de la review, entre 0 et 10
         comment:
           type: string
+          description: Commentaire de la review
       example:
         pseudo: Cat4Life
         hash: dQw4w9WgXcQ
@@ -167,17 +171,22 @@ components:
       properties:
         hash:
           type: string
+          description: Hash de la vidéo
         name:
           type: string
+          description: Nom de la vidéo
         author:
           type: string
+          description: Auteur de la vidéo
         creationYear:
           type: integer
+          description: Année de création de la vidéo
         duration:
           type: integer
-          description: in seconds
+          description: Durée de la vidéo, en secondes
         url:
           type: string
+          description: URL de la vidéo
       example:
         hash: dQw4w9WgXcQ
         name: Cutest kitty ever

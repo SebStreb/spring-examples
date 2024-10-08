@@ -9,27 +9,25 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(name = "videos")
 public interface VideosProxy {
 
-    @GetMapping("/videos")
-    Iterable<Video> readVideos();
-
-
     @PostMapping("/videos/{hash}")
     void createVideo(@PathVariable String hash, @RequestBody Video video);
+
+
+    @GetMapping("/videos")
+    Iterable<Video> readVideos();
 
     @GetMapping("/videos/{hash}")
     Video readVideo(@PathVariable String hash);
 
+    @GetMapping("/videos/users/{pseudo}")
+    Iterable<Video> readVideosFromAuthor(@PathVariable String pseudo);
+
+
     @PutMapping("/videos/{hash}")
     void updateVideo(@PathVariable String hash, @RequestBody Video video);
 
+
     @DeleteMapping("/videos/{hash}")
     void deleteVideo(@PathVariable String hash);
-
-
-    @GetMapping("/videos/author/{pseudo}")
-    Iterable<Video> readVideosFromAuthor(@PathVariable String pseudo);
-
-    @DeleteMapping("/videos/author/{pseudo}")
-    void deleteVideosFromAuthor(@PathVariable String pseudo);
 
 }

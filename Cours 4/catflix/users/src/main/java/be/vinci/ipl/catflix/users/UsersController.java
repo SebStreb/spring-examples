@@ -1,8 +1,11 @@
 package be.vinci.ipl.catflix.users;
 
+import be.vinci.ipl.catflix.users.models.User;
+import be.vinci.ipl.catflix.users.models.UserWithCredentials;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Objects;
 
@@ -16,41 +19,37 @@ public class UsersController {
     }
 
     @PostMapping("/users/{pseudo}")
-    public ResponseEntity<Void> createOne(@PathVariable String pseudo, @RequestBody User user) {
-        if (!Objects.equals(user.getPseudo(), pseudo)) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        if (user.invalid()) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Void> createOne(@PathVariable String pseudo, @RequestBody UserWithCredentials user) {
+        if (!Objects.equals(user.getPseudo(), pseudo)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if (user.invalid()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
         boolean created = service.createOne(user);
 
-        if (!created) return new ResponseEntity<>(HttpStatus.CONFLICT);
+        if (!created) throw new ResponseStatusException(HttpStatus.CONFLICT);
         else return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/users/{pseudo}")
-    public ResponseEntity<User> readOne(@PathVariable String pseudo) {
+    public User readOne(@PathVariable String pseudo) {
         User user = service.readOne(pseudo);
 
-        if (user == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(user, HttpStatus.OK);
+        if (user == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        else return user;
     }
 
     @PutMapping("/users/{pseudo}")
-    public ResponseEntity<User> updateOne(@PathVariable String pseudo, @RequestBody User user) {
-        if (!Objects.equals(user.getPseudo(), pseudo)) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        if (user.invalid()) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    public void updateOne(@PathVariable String pseudo, @RequestBody UserWithCredentials user) {
+        if (!Objects.equals(user.getPseudo(), pseudo)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if (user.invalid()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
         boolean found = service.updateOne(user);
-
-        if (!found) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(HttpStatus.OK);
+        if (!found) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/users/{pseudo}")
-    public ResponseEntity<User> deleteOne(@PathVariable String pseudo) {
+    public void deleteOne(@PathVariable String pseudo) {
         boolean found = service.deleteOne(pseudo);
-
-        if (!found) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>(HttpStatus.OK);
+        if (!found) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
 }

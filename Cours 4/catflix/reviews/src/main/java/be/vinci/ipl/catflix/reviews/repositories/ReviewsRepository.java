@@ -29,7 +29,7 @@ public interface ReviewsRepository extends CrudRepository<Review, Long> {
     @Transactional
     void deleteByHash(String hash);
 
-    @Query("select hash as videoHash, avg(rating) as avgRating from reviews group by hash order by avgRating desc")
+    @Query("select hash as videoHash, avg(rating) as avgRating from reviews group by videoHash order by avgRating desc")
     Iterable<Tuple> findBest();
 
 }

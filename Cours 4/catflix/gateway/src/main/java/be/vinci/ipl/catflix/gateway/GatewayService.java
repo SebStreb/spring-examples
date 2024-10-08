@@ -4,10 +4,7 @@ import be.vinci.ipl.catflix.gateway.data.AuthenticationProxy;
 import be.vinci.ipl.catflix.gateway.data.ReviewsProxy;
 import be.vinci.ipl.catflix.gateway.data.UsersProxy;
 import be.vinci.ipl.catflix.gateway.data.VideosProxy;
-import be.vinci.ipl.catflix.gateway.exceptions.BadRequestException;
-import be.vinci.ipl.catflix.gateway.exceptions.ConflictException;
-import be.vinci.ipl.catflix.gateway.exceptions.NotFoundException;
-import be.vinci.ipl.catflix.gateway.exceptions.UnauthorizedException;
+import be.vinci.ipl.catflix.gateway.exceptions.*;
 import be.vinci.ipl.catflix.gateway.models.*;
 import feign.FeignException;
 import org.springframework.stereotype.Service;
@@ -20,10 +17,7 @@ public class GatewayService {
     private final UsersProxy usersProxy;
     private final VideosProxy videosProxy;
 
-    public GatewayService(AuthenticationProxy authenticationProxy,
-                          ReviewsProxy reviewsProxy,
-                          UsersProxy usersProxy,
-                          VideosProxy videosProxy) {
+    public GatewayService(AuthenticationProxy authenticationProxy, ReviewsProxy reviewsProxy, UsersProxy usersProxy, VideosProxy videosProxy) {
         this.authenticationProxy = authenticationProxy;
         this.reviewsProxy = reviewsProxy;
         this.usersProxy = usersProxy;
@@ -35,7 +29,7 @@ public class GatewayService {
      *
      * @param credentials Credentials of the user
      * @return Connection token
-     * @throws BadRequestException when the credentials are invalid
+     * @throws BadRequestException   when the credentials are invalid
      * @throws UnauthorizedException when the credentials are incorrect
      */
     public String connect(Credentials credentials) throws BadRequestException, UnauthorizedException {
@@ -52,41 +46,31 @@ public class GatewayService {
      * Get user pseudo from connection token
      *
      * @param token Connection token
-     * @return User pseudo, or null if token invalid
+     * @throws UnauthorizedException when the credentials are incorrect
+     * @throws ForbiddenException    when the user pseudo is not the expected one
      */
-    public String verify(String token) {
+    public void verify(String token,
+                       String expectedPseudo) throws UnauthorizedException, ForbiddenException {
         try {
-            return authenticationProxy.verify(token);
+            String userPseudo = authenticationProxy.verify(token);
+            if (!userPseudo.equals(expectedPseudo)) throw new ForbiddenException();
         } catch (FeignException e) {
-            if (e.status() == 401) return null;
+            if (e.status() == 401) throw new UnauthorizedException();
             else throw e;
         }
     }
 
     /**
-     * Create user and credentials
+     * Create user
      *
      * @param user User to create with credentials
-     * @throws BadRequestException When the user or the credentials are not valid
-     * @throws ConflictException   When the user or the credentials already exist
+     * @throws BadRequestException When the user is not valid
+     * @throws ConflictException   When the user already exists
      */
     public void createUser(UserWithCredentials user) throws BadRequestException, ConflictException {
         try {
-            usersProxy.createUser(user.getPseudo(), user.toUser());
+            usersProxy.createUser(user.getPseudo(), user);
         } catch (FeignException e) {
-            if (e.status() == 400) throw new BadRequestException();
-            else if (e.status() == 409) throw new ConflictException();
-            else throw e;
-        }
-
-        try {
-            authenticationProxy.createCredentials(user.getPseudo(), user.toCredentials());
-        } catch (FeignException e) {
-            try {
-                usersProxy.deleteUser(user.getPseudo());
-            } catch (FeignException ignored) {
-            }
-
             if (e.status() == 400) throw new BadRequestException();
             else if (e.status() == 409) throw new ConflictException();
             else throw e;
@@ -97,49 +81,29 @@ public class GatewayService {
      * Read user information
      *
      * @param pseudo Pseudo of the user
-     * @return User information, or null if user not found
+     * @return User information
+     * @throws NotFoundException when the user could not be found
      */
-    public User readUser(String pseudo) {
+    public User readUser(String pseudo) throws NotFoundException {
         try {
             return usersProxy.readUser(pseudo);
-        } catch (FeignException e) {
-            if (e.status() == 404) return null;
-            else throw e;
-        }
-    }
-
-    /**
-     * Update user and credentials
-     *
-     * @param user User to create with credentials
-     * @throws BadRequestException When the user or the credentials are not valid
-     * @throws NotFoundException   When the user or the credentials couldn't be found
-     */
-    public void updateUser(UserWithCredentials user) throws BadRequestException, NotFoundException {
-        User previousUser;
-        try {
-            previousUser = usersProxy.readUser(user.getPseudo());
         } catch (FeignException e) {
             if (e.status() == 404) throw new NotFoundException();
             else throw e;
         }
+    }
 
+    /**
+     * Update user
+     *
+     * @param user User to create with credentials
+     * @throws BadRequestException When the user is not valid
+     * @throws NotFoundException   When the user couldn't be found
+     */
+    public void updateUser(UserWithCredentials user) throws BadRequestException, NotFoundException {
         try {
-            usersProxy.updateUser(user.getPseudo(), user.toUser());
+            usersProxy.updateUser(user.getPseudo(), user);
         } catch (FeignException e) {
-            if (e.status() == 400) throw new BadRequestException();
-            else if (e.status() == 404) throw new NotFoundException();
-            else throw e;
-        }
-
-        try {
-            authenticationProxy.updateCredentials(user.getPseudo(), user.toCredentials());
-        } catch (FeignException e) {
-            try {
-                usersProxy.updateUser(user.getPseudo(), previousUser);
-            } catch (FeignException ignored) {
-            }
-
             if (e.status() == 400) throw new BadRequestException();
             else if (e.status() == 404) throw new NotFoundException();
             else throw e;
@@ -147,29 +111,18 @@ public class GatewayService {
     }
 
     /**
-     * Delete user and everything linked to them
+     * Delete user
      *
      * @param pseudo Pseudo of the user
-     * @return false if either no user or credentials found for this pseudo, true otherwise
+     * @throws NotFoundException when the user could not be found
      */
-    public boolean deleteUser(String pseudo) {
-        reviewsProxy.deleteReviewsFromUser(pseudo);
-        videosProxy.deleteVideosFromAuthor(pseudo);
-
-        boolean found = true;
-        try {
-            authenticationProxy.deleteCredentials(pseudo);
-        } catch (FeignException e) {
-            if (e.status() == 404) found = false;
-            else throw e;
-        }
+    public void deleteUser(String pseudo) throws NotFoundException {
         try {
             usersProxy.deleteUser(pseudo);
         } catch (FeignException e) {
-            if (e.status() == 404) found = false;
+            if (e.status() == 404) throw new NotFoundException();
             else throw e;
         }
-        return found;
     }
 
     /**
@@ -186,17 +139,9 @@ public class GatewayService {
      *
      * @param video the video to create
      * @throws BadRequestException when the video is not valid
-     * @throws NotFoundException   when the author of the video does not exist
      * @throws ConflictException   when a video already exists for this hash
      */
-    public void createVideo(Video video) throws BadRequestException, NotFoundException, ConflictException {
-        try {
-            usersProxy.readUser(video.getAuthor());
-        } catch (FeignException e) {
-            if (e.status() == 404) throw new NotFoundException();
-            else throw e;
-        }
-
+    public void createVideo(Video video) throws BadRequestException, ConflictException {
         try {
             videosProxy.createVideo(video.getHash(), video);
         } catch (FeignException e) {
@@ -210,13 +155,14 @@ public class GatewayService {
      * Read a video
      *
      * @param hash Hash of the video
-     * @return The video, or null if no video found for this hash
+     * @return The video
+     * @throws NotFoundException when the video couldn't be found
      */
-    public Video readVideo(String hash) {
+    public Video readVideo(String hash) throws NotFoundException {
         try {
             return videosProxy.readVideo(hash);
         } catch (FeignException e) {
-            if (e.status() == 404) return null;
+            if (e.status() == 404) throw new NotFoundException();
             else throw e;
         }
     }
@@ -226,16 +172,9 @@ public class GatewayService {
      *
      * @param video the video to update
      * @throws BadRequestException when the video is invalid
-     * @throws NotFoundException when no video could be found
+     * @throws NotFoundException   when no video could be found
      */
     public void updateVideo(Video video) throws BadRequestException, NotFoundException {
-        try {
-            usersProxy.readUser(video.getAuthor());
-        } catch (FeignException e) {
-            if (e.status() == 404) throw new NotFoundException();
-            else throw e;
-        }
-
         try {
             videosProxy.updateVideo(video.getHash(), video);
         } catch (FeignException e) {
@@ -246,22 +185,18 @@ public class GatewayService {
     }
 
     /**
-     * Delete a video and all reviews linked to that video
+     * Delete a video
      *
      * @param hash Hash of the video
-     * @return true if the video could be found, false otherwise
+     * @throws NotFoundException when the video could not be found
      */
-    public boolean deleteVideo(String hash) {
-        reviewsProxy.deleteReviewsOfVideo(hash);
-
-        boolean found = true;
+    public void deleteVideo(String hash) throws NotFoundException {
         try {
             videosProxy.deleteVideo(hash);
         } catch (FeignException e) {
-            if (e.status() == 404) found = false;
+            if (e.status() == 404) throw new NotFoundException();
             else throw e;
         }
-        return found;
     }
 
     /**
@@ -271,13 +206,6 @@ public class GatewayService {
      * @return List of all videos from this user, or null if the user could not be found
      */
     public Iterable<Video> readVideosFromUser(String pseudo) {
-        try {
-            usersProxy.readUser(pseudo);
-        } catch (FeignException e) {
-            if (e.status() == 404) return null;
-            else throw e;
-        }
-
         return videosProxy.readVideosFromAuthor(pseudo);
     }
 
@@ -286,24 +214,9 @@ public class GatewayService {
      *
      * @param review Review to create
      * @throws BadRequestException when the review is invalid
-     * @throws NotFoundException when the user or the video of the review could not be found
-     * @throws ConflictException when a review already exists for this user and video
+     * @throws ConflictException   when a review already exists for this user and video
      */
-    public void createReview(Review review) throws BadRequestException, NotFoundException, ConflictException {
-        try {
-            usersProxy.readUser(review.getPseudo());
-        } catch (FeignException e) {
-            if (e.status() == 404) throw new NotFoundException();
-            else throw e;
-        }
-
-        try {
-            videosProxy.readVideo(review.getHash());
-        } catch (FeignException e) {
-            if (e.status() == 404) throw new NotFoundException();
-            else throw e;
-        }
-
+    public void createReview(Review review) throws BadRequestException, ConflictException {
         try {
             reviewsProxy.createReview(review.getPseudo(), review.getHash(), review);
         } catch (FeignException e) {
@@ -317,14 +230,15 @@ public class GatewayService {
      * Read a review
      *
      * @param pseudo Pseudo of the user
-     * @param hash Hash of the video
-     * @return The review corresponding to this user and video, or null if none could be found
+     * @param hash   Hash of the video
+     * @return The review corresponding to this user and video
+     * @throws NotFoundException when the review could not be found
      */
-    public Review readReview(String pseudo, String hash) {
+    public Review readReview(String pseudo, String hash) throws NotFoundException {
         try {
             return reviewsProxy.readReview(pseudo, hash);
         } catch (FeignException e) {
-            if (e.status() == 404) return null;
+            if (e.status() == 404) throw new NotFoundException();
             else throw e;
         }
     }
@@ -334,23 +248,9 @@ public class GatewayService {
      *
      * @param review Review to update
      * @throws BadRequestException when the review is invalid
-     * @throws NotFoundException when the review could not be found
+     * @throws NotFoundException   when the review could not be found
      */
     public void updateReview(Review review) throws BadRequestException, NotFoundException {
-        try {
-            usersProxy.readUser(review.getPseudo());
-        } catch (FeignException e) {
-            if (e.status() == 404) throw new NotFoundException();
-            else throw e;
-        }
-
-        try {
-            videosProxy.readVideo(review.getHash());
-        } catch (FeignException e) {
-            if (e.status() == 404) throw new NotFoundException();
-            else throw e;
-        }
-
         try {
             reviewsProxy.updateReview(review.getPseudo(), review.getHash(), review);
         } catch (FeignException e) {
@@ -364,34 +264,25 @@ public class GatewayService {
      * Delete a review
      *
      * @param pseudo Pseudo of the user
-     * @param hash Hash of the video
-     * @return true if the review could be found and deleted, false otherwise
+     * @param hash   Hash of the video
+     * @throws NotFoundException when the review could not be found
      */
-    public boolean deleteReview(String pseudo, String hash) {
-        boolean found = true;
+    public void deleteReview(String pseudo, String hash) throws NotFoundException {
         try {
             reviewsProxy.deleteReview(pseudo, hash);
         } catch (FeignException e) {
-            if (e.status() == 404) found = false;
+            if (e.status() == 404) throw new NotFoundException();
             else throw e;
         }
-        return found;
     }
 
     /**
      * Read all reviews from a user
      *
      * @param pseudo Pseudo of the user
-     * @return The list of all reviews from this user, or null if the user could not be found
+     * @return The list of all reviews from this user
      */
     public Iterable<Review> readReviewsFromUser(String pseudo) {
-        try {
-            usersProxy.readUser(pseudo);
-        } catch (FeignException e) {
-            if (e.status() == 404) return null;
-            else throw e;
-        }
-
         return reviewsProxy.readReviewsFromUser(pseudo);
     }
 
@@ -399,16 +290,9 @@ public class GatewayService {
      * Read all reviews of a video
      *
      * @param hash Hash of the video
-     * @return The list of all reviews of this video, or null if the video could not be found
+     * @return The list of all reviews of this video
      */
     public Iterable<Review> readReviewsOfVideo(String hash) {
-        try {
-            videosProxy.readVideo(hash);
-        } catch (FeignException e) {
-            if (e.status() == 404) return null;
-            else throw e;
-        }
-
         return reviewsProxy.readReviewsOfVideo(hash);
     }
 

@@ -5,21 +5,23 @@ Content-Type: application/json
 {
   "pseudo": "CutieCat",
   "firstname": "Catherine",
-  "lastname": "Mireault"
+  "lastname": "Mireault",
+  "password": "password"
 }
 
 ### Read user
 GET http://localhost:9002/users/CutieCat
 
 ### Update user
-PUT http://localhost:9002/users/PetWard
+PUT http://localhost:9002/users/CutieCat
 Content-Type: application/json
 
 {
-  "pseudo": "PetWard",
-  "firstname": "Pet",
-  "lastname": "Ward"
+  "pseudo": "CutieCat",
+  "firstname": "Something",
+  "lastname": "Else",
+  "password": "password2"
 }
 
 ### Delete user
-DELETE http://localhost:9002/users/pettier
+DELETE http://localhost:9002/users/CutieCat

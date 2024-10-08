@@ -1,4 +1,4 @@
-package be.vinci.ipl.catflix.videos;
+package be.vinci.ipl.catflix.videos.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

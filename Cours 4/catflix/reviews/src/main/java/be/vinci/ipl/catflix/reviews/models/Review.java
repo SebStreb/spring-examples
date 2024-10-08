@@ -25,13 +25,11 @@ public class Review {
     @Column(nullable = false)
     private int rating; // between 0 and 10
 
-    @Column(nullable = false)
     private String comment;
 
     public boolean invalid() {
         return pseudo == null || pseudo.isBlank() ||
                 hash == null || hash.isBlank() ||
-                rating < 0 || rating > 10 ||
-                comment == null || comment.isBlank();
+                rating < 0 || rating > 10;
     }
 }

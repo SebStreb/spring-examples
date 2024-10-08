@@ -10,34 +10,28 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(name = "reviews")
 public interface ReviewsProxy {
 
-    @PostMapping("/reviews/{pseudo}/{hash}")
+    @PostMapping("/reviews/users/{pseudo}/videos/{hash}")
     void createReview(@PathVariable String pseudo, @PathVariable String hash, @RequestBody Review review);
 
-    @GetMapping("/reviews/{pseudo}/{hash}")
+
+    @GetMapping("/reviews/users/{pseudo}/videos/{hash}")
     Review readReview(@PathVariable String pseudo, @PathVariable String hash);
 
-    @PutMapping("/reviews/{pseudo}/{hash}")
-    void updateReview(@PathVariable String pseudo, @PathVariable String hash, @RequestBody Review review);
-
-    @DeleteMapping("/reviews/{pseudo}/{hash}")
-    void deleteReview(@PathVariable String pseudo, @PathVariable String hash);
-
-
-    @GetMapping("/reviews/user/{pseudo}")
+    @GetMapping("/reviews/users/{pseudo}")
     Iterable<Review> readReviewsFromUser(@PathVariable String pseudo);
 
-    @DeleteMapping("/reviews/user/{pseudo}")
-    void deleteReviewsFromUser(@PathVariable String pseudo);
-
-
-    @GetMapping("/reviews/video/{hash}")
+    @GetMapping("/reviews/videos/{hash}")
     Iterable<Review> readReviewsOfVideo(@PathVariable String hash);
-
-    @DeleteMapping("/reviews/video/{hash}")
-    void deleteReviewsOfVideo(@PathVariable String hash);
-
 
     @GetMapping("/reviews/best")
     Iterable<Video> readBestVideos();
+
+
+    @PutMapping("/reviews/users/{pseudo}/videos/{hash}")
+    void updateReview(@PathVariable String pseudo, @PathVariable String hash, @RequestBody Review review);
+
+
+    @DeleteMapping("/reviews/users/{pseudo}/videos/{hash}")
+    void deleteReview(@PathVariable String pseudo, @PathVariable String hash);
 
 }

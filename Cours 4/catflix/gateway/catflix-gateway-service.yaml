@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
-  title: Catflix gateway service
-  description: Microservice handling gateway for Catflix project
+  title: Catflix Gateway Service
+  description: Microservice d'interface pour le projet Catflix. Permet de connecter les utilisateurs, et de gérer les utilisateurs, les vidéos et les reviews.
   version: 1.0.0
 servers:
   - url: 'http://localhost:8080'
@@ -10,20 +10,20 @@ paths:
 
   /auth:
     post:
-      summary: Connect user
+      summary: Connecter l'utilisateur
       requestBody:
-        description: Credentials of the user
+        description: Identifiants de l'utilisateur
         content:
           'application/json':
             schema:
               $ref: '#/components/schemas/credentials'
       responses:
         400:
-          description: Invalid
+          description: Les identifiants ne correspondent pas à ce qui est attendu
         401:
-          description: Wrong username or password
+          description: Les identifiants sont incorrects
         200:
-          description: Returned token
+          description: Retourne un token d'authentification prouvant l'identité de l'utilisateur
           content:
             'application/json':
               schema:
@@ -34,82 +34,86 @@ paths:
     parameters:
       - name: pseudo
         in: path
-        description: Pseudo of the user
+        description: Pseudo de l'utilisateur
         schema:
           type: string
         example: PetWard
     post:
-      summary: Create user
+      summary: Créer un utilisateur et ses identifiants
       requestBody:
-        description: User
+        description: Données de l'utilisateur avec ses identifiants
         content:
           'application/json':
             schema:
               $ref: '#/components/schemas/userWithCredentials'
       responses:
         400:
-          description: Invalid
+          description: Les données de l'utilisateur ne correspondent pas à ce qui est attendu
         409:
-          description: Already exists
+          description: Un utilisateur existe déjà avec ce pseudo
         201:
-          description: Created
+          description: L'utilisateur a été créé
     get:
-      summary: Read user
+      summary: Lire un utilisateur
       responses:
         404:
-          description: Not found
+          description: L'utilisateur n'a pas été trouvé
         200:
-          description: Found
+          description: Retourne les données de l'utilisateur
           content:
             'application/json':
               schema:
                 $ref: '#/components/schemas/user'
     put:
-      summary: Update user
+      summary: Modifier un utilisateur et ses identifiants
+      security:
+        - jwt:
+            - Connecté en tant que l'utilisateur voulant modifier ses données
       requestBody:
-        description: User
+        description: Données de l'utilisateur avec ses identifiants
         content:
           'application/json':
             schema:
               $ref: '#/components/schemas/userWithCredentials'
       responses:
         400:
-          description: Invalid
+          description: Les données de l'utilisateur ne correspondent pas à ce qui est attendu
         401:
-          description: Wrong authorization token
+          description: Le token d'authentification n'a pas pu être vérifié
         403:
-          description: Wrong user
+          description: L'utilisateur n'est pas autorisé à modifier ces données
         404:
-          description: Not found
+          description: L'utilisateur n'a pas été trouvé
         200:
-          description: Updated
+          description: L'utilisateur a été modifié
     delete:
-      summary: Delete user
+      summary: Supprimer un utilisateur
+      security:
+        - jwt:
+            - Connecté en tant que l'utilisateur voulant supprimer son compte
       responses:
         401:
-          description: Wrong authorization token
+          description: Le token d'authentification n'a pas pu être vérifié
         403:
-          description: Wrong user
+          description: L'utilisateur n'est pas autorisé à supprimer ce compte
         404:
-          description: Not found
+          description: L'utilisateur n'a pas été trouvé
         200:
-          description: Deleted
+          description: L'utilisateur a été supprimé
 
   /users/{pseudo}/videos:
     get:
-      summary: Read user videos
+      summary: Lire les vidéos de l'utilisateur
       parameters:
         - name: pseudo
           in: path
-          description: Pseudo of the user
+          description: Pseudo de l'utilisateur
           schema:
             type: string
           example: PetWard
       responses:
-        404:
-          description: Not found
         200:
-          description: Found
+          description: Retourne les vidéos de l'utilisateur
           content:
             'application/json':
               schema:
@@ -119,19 +123,17 @@ paths:
 
   /users/{pseudo}/reviews:
     get:
-      summary: Read user reviews
+      summary: Lire les reviews de l'utilisateur
       parameters:
         - name: pseudo
           in: path
-          description: Pseudo of the user
+          description: Pseudo de l'utilisateur
           schema:
             type: string
           example: PetWard
       responses:
-        404:
-          description: Not found
         200:
-          description: Found
+          description: Retourne les reviews de l'utilisateur
           content:
             'application/json':
               schema:
@@ -141,10 +143,10 @@ paths:
 
   /videos:
     get:
-      summary: Read all videos
+      summary: Lire toutes les vidéos
       responses:
         200:
-          description: Found
+          description: Retourne toutes les vidéos
           content:
             'application/json':
               schema:
@@ -154,10 +156,10 @@ paths:
 
   /videos/best:
     get:
-      summary: Read 3 best rated videos
+      summary: Lire les 3 vidéos les mieux notées
       responses:
         200:
-          description: Found
+          description: Retourne les 3 vidéos les mieux notées
           content:
             'application/json':
               schema:
@@ -170,88 +172,93 @@ paths:
     parameters:
       - name: hash
         in: path
-        description: Hash of the video
+        description: Hash de la vidéo
         schema:
           type: string
         example: dQw4w9WgXcQ
     post:
-      summary: Create video
+      summary: Crée une vidéo
+      security:
+        - jwt:
+            - Connecté en tant que l'auteur de la vidéo
       requestBody:
-        description: Video
+        description: Données de la vidéo
         content:
           'application/json':
             schema:
               $ref: '#/components/schemas/video'
       responses:
         400:
-          description: Invalid
+          description: Les données de la vidéo ne correspondent pas à ce qui est attendu
         401:
-          description: Wrong authorization token
+          description: Le token d'authentification n'a pas pu être vérifié
         403:
-          description: Wrong user
-        404:
-          description: User not found
+          description: L'utilisateur n'est pas autorisé à créer cette vidéo
         409:
-          description: Already exists
+          description: Une vidéo existe déjà avec ce hash
         201:
-          description: Created
+          description: La vidéo a été créée
     get:
-      summary: Read video
+      summary: Lire une vidéo
       responses:
         404:
-          description: Not found
+          description: La vidéo n'a pas été trouvée
         200:
-          description: Found
+          description: Retourne les données de la vidéo
           content:
             'application/json':
               schema:
                 $ref: '#/components/schemas/video'
     put:
-      summary: Update video
+      summary: Modifier une vidéo
+      security:
+        - jwt:
+            - Connecté en tant que l'auteur de la vidéo
       requestBody:
-        description: Video
+        description: Données de la vidéo
         content:
           'application/json':
             schema:
               $ref: '#/components/schemas/video'
       responses:
         400:
-          description: Invalid
+          description: Les données de la vidéo ne correspondent pas à ce qui est attendu
         401:
-          description: Wrong authorization token
+          description: Le token d'authentification n'a pas pu être vérifié
         403:
-          description: Wrong user
+          description: L'utilisateur n'est pas autorisé à modifier cette vidéo
         404:
-          description: Not found
+          description: La vidéo n'a pas été trouvée
         200:
-          description: Updated
+          description: La vidéo a été modifiée
     delete:
-      summary: Delete video
+      summary: Supprimer une vidéo
+      security:
+        - jwt:
+            - Connecté en tant que l'auteur de la vidéo
       responses:
         401:
-          description: Wrong authorization token
+          description: Le token d'authentification n'a pas pu être vérifié
         403:
-          description: Wrong user
+          description: L'utilisateur n'est pas autorisé à supprimer cette vidéo
         404:
-          description: Not found
+          description: La vidéo n'a pas été trouvée
         200:
-          description: Deleted
+          description: La vidéo a été supprimée
 
   /videos/{hash}/reviews:
     get:
-      summary: Read video reviews
+      summary: Lire les reviews de la vidéo
       parameters:
         - name: hash
           in: path
-          description: Hash of the video
+          description: Hash de la video
           schema:
             type: string
           example: dQw4w9WgXcQ
       responses:
-        404:
-          description: Not found
         200:
-          description: Found
+          description: Retourne les reviews de la vidéo
           content:
             'application/json':
               schema:
@@ -263,78 +270,85 @@ paths:
     parameters:
       - name: pseudo
         in: path
-        description: Pseudo of the user
+        description: Pseudo de l'utilisateur
         schema:
           type: string
         example: PetWard
       - name: hash
         in: path
-        description: Hash of the video
+        description: Hash de la video
         schema:
           type: string
         example: dQw4w9WgXcQ
     post:
-      summary: Create review
+      summary: Créer une review
+      security:
+        - jwt:
+            - Connecté en tant que l'utilisateur voulant créer une review
       requestBody:
-        description: Review
+        description: Données de la review
         content:
           'application/json':
             schema:
               $ref: '#/components/schemas/review'
       responses:
         400:
-          description: Invalid
+          description: Les données de la review ne correspondent pas à ce qui est attendu
         401:
-          description: Wrong authorization token
+          description: Le token d'authentification n'a pas pu être vérifié
         403:
-          description: Wrong user
-        404:
-          description: User or video not found
+          description: L'utilisateur n'est pas autorisé à créer cette review
         409:
-          description: Already exists
+          description: Une review existe déjà pour cette vidéo et cet utilisateur
         201:
-          description: Created
+          description: La review a été créée
     get:
-      summary: Read review
+      summary: Lire une review
       responses:
         404:
-          description: Not found
+          description: La review n'a pas été trouvée
         200:
-          description: Found
+          description: Retourne les données de la review
           content:
             'application/json':
               schema:
                 $ref: '#/components/schemas/review'
     put:
-      summary: Update review
+      summary: Mettre à jour une review
+      security:
+          - jwt:
+              - Connecté en tant que l'utilisateur voulant modifier une review
       requestBody:
-        description: Review
+        description: Données de la review
         content:
           'application/json':
             schema:
               $ref: '#/components/schemas/review'
       responses:
         400:
-          description: Invalid
+          description: Les données de la review ne correspondent pas à ce qui est attendu
         401:
-          description: Wrong authorization token
+          description: Le token d'authentification n'a pas pu être vérifié
         403:
-          description: Wrong user
+          description: L'utilisateur n'est pas autorisé à modifier cette review
         404:
-          description: Not found
+          description: La review n'a pas été trouvée
         200:
-          description: Updated
+          description: La review a été modifiée
     delete:
-      summary: Delete review
+      summary: Supprimer une review
+      security:
+          - jwt:
+              - Connecté en tant que l'utilisateur voulant supprimer une review
       responses:
         401:
-          description: Wrong authorization token
+          description: Le token d'authentification n'a pas pu être vérifié
         403:
-          description: Wrong user
+          description: L'utilisateur n'est pas autorisé à supprimer cette review
         404:
-          description: Not found
+          description: La review n'a pas été trouvée
         200:
-          description: Deleted
+          description: La review a été supprimée
 
 components:
   schemas:
