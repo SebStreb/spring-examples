@@ -4,15 +4,14 @@ const eureka = require('eureka-js-client');
 
 const client = new eureka.Eureka({
     instance: {
-        app: 'node-client',
-        hostName: 'localhost:10000',
+        app: 'dummy',
+        hostName: 'localhost',
         ipAddr: '127.0.0.1',
-        statusPageUrl: 'http://localhost:10000/info',
+        vipAddress: 'dummy',
         port: {
             '$': 10000,
             '@enabled': true,
         },
-        vipAddress: 'node-client',
         dataCenterInfo: {
             '@class': 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo',
             name: 'MyOwn',
