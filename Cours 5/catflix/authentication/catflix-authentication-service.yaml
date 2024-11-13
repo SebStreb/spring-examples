@@ -1,0 +1,115 @@
+openapi: 3.0.3
+info:
+  title: Catflix authentication service
+  description: Microservice de gestion des identifiants et en charge de l'authentification pour le projet Catflix
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:9004'
+    description: Development server
+paths:
+
+  /authentication/connect:
+    post:
+      summary: Connecter l'utilisateur en lui retournant un token JWT
+      requestBody:
+        description: Identifiants de l'utilisateur
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/credentials'
+      responses:
+        400:
+          description: Les identifiants ne correspondent pas à ce qui serait attendus
+        401:
+          description: Mauvais pseudo ou mot de passe
+        200:
+          description: Retourne un token JWT permettant d'authentifier l'utilisateur
+          content:
+            'text/plain':
+              schema:
+                type: string
+                example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJhdXRoMCIsInBzZXVkbyI6IkNhdDRMaWZlIn0.LqfooEI-I9VTBo-isjm812ttnIPagMCwdhRkW5ngn0_tlLX86LRoxahgskmgIeWDbm4Mu3y3D8Qbhq_71hNQTA
+
+  /authentication/verify:
+    post:
+      summary: Vérifier un token JWT
+      requestBody:
+        description: Token JWT
+        content:
+          'text/plain':
+            schema:
+              type: string
+              example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJhdXRoMCIsInBzZXVkbyI6IkNhdDRMaWZlIn0.LqfooEI-I9VTBo-isjm812ttnIPagMCwdhRkW5ngn0_tlLX86LRoxahgskmgIeWDbm4Mu3y3D8Qbhq_71hNQTA
+      responses:
+        401:
+          description: Le token n'a pas pu être vérifié
+        200:
+          description: Token vérifié, retourne le pseudo de l'utilisateur
+          content:
+            'application/json':
+              schema:
+                type: string
+                example: Cat4Life
+
+  /authentication/{pseudo}:
+    parameters:
+      - name: pseudo
+        in: path
+        description: Pseudo de l'utilisateur
+        schema:
+          type: string
+
+    post:
+      summary: Créer les identifiants de l'utilisateur
+      requestBody:
+        description: Identifiants de l'utilisateur
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/credentials'
+      responses:
+        400:
+          description: Les identifiants ne correspondent pas à ce qui serait attendus
+        409:
+          description: Des identifiants existent déjà pour ce pseudo
+        201:
+          description: Les identifiants ont été créés
+
+    put:
+      summary: Modifier les identifiants de l'utilisateur
+      requestBody:
+        description: Identifiants de l'utilisateur
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/credentials'
+      responses:
+        400:
+          description: Les identifiants ne correspondent pas à ce qui serait attendus
+        404:
+          description: Aucuns identifiants n'ont été trouvé pour ce pseudo
+        200:
+          description: Les identifiants ont été modifiés
+
+    delete:
+      summary: Supprimer les identifiants de l'utilisateur
+      responses:
+        404:
+          description: Aucuns identifiants n'ont été trouvé pour ce pseudo
+        200:
+          description: Les identifiants ont été supprimés
+
+components:
+  schemas:
+    credentials:
+      type: object
+      properties:
+        pseudo:
+          type: string
+          description: Pseudo de l'utilisateur
+        password:
+          type: string
+          description: Mot de passe de l'utilisateur
+      example:
+        pseudo: Cat4Life
+        password: password123

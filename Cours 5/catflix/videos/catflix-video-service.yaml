@@ -1,0 +1,152 @@
+openapi: 3.0.3
+info:
+  title: Catflix Video Service
+  description: Microservice de gestion des vidéos pour le projet Catflix. Permet de créer, lire, modifier et supprimer des vidéos, ainsi que de lire et supprimer toutes les vidéos ou toutes les vidéos d'un certain auteur.
+  version: 1.0.0
+servers:
+  - url: http://localhost:9001
+    description: Development server
+paths:
+
+  /videos:
+
+    get:
+      summary: Lire toutes les vidéos
+      responses:
+        200:
+          description: Retourne la liste de toutes les vidéos
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/video'
+
+    delete:
+      summary: Supprimer toutes les vidéos et les reviews associées
+      responses:
+        200:
+          description: Toutes les vidéos ont été supprimées ainsi que les reviews associées
+
+
+  /videos/{hash}:
+    parameters:
+      - name: hash
+        in: path
+        description: Hash de la vidéo
+        required: true
+        schema:
+          type: string
+          example: dQw4w9WgXcQ
+
+    post:
+      summary: Créer une vidéo
+      requestBody:
+        description: Données de la vidéo à créer
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/video'
+      responses:
+        400:
+          description: Le hash en paramètre ne correspond pas au hash dans les données de la vidéo, ces données ne correspondent pas à ce qui serait attendu ou l'auteur de la vidéo n'existe pas
+        409:
+          description: Une vidéo existe déjà avec ce hash
+        201:
+          description: La vidéo a été créée
+
+    get:
+      summary: Lire une vidéo sur base de son hash
+      responses:
+        404:
+          description: Aucune vidéo n'a été trouvée pour ce hash
+        200:
+          description: Retourne les données de la vidéo correspondante
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/video'
+
+    put:
+      summary: Modifier une video sur base de son hash
+      requestBody:
+        description: Nouvelles données de la vidéo à modifier
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/video'
+      responses:
+        400:
+          description: Le hash en paramètre ne correspond pas au hash dans les données de la vidéo, ces données ne correspondent pas à ce qui serait attendu ou l'auteur de la vidéo n'existe pas
+        404:
+          description: Aucune vidéo n'a été trouvée pour ce hash
+        200:
+          description: La vidéo a été modifiée
+
+    delete:
+      summary: Supprimer une vidéo sur base de son hash et toutes les reviews associées
+      responses:
+        404:
+          description: Aucune vidéo n'a été trouvée pour ce hash
+        200:
+          description: La vidéo a été supprimée, ainsi que toutes les reviews associées
+
+  /videos/users/{author}:
+    parameters:
+      - name: author
+        in: path
+        required: true
+        description: Auteur de la vidéo
+        schema:
+          type: string
+          example: Cat4Life
+
+    get:
+      summary: Lire toutes les vidéos d'un certain auteur
+      responses:
+        200:
+          description: Retourne la liste de toutes les vidéos de cet auteur
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/video'
+
+    delete:
+      summary: Supprimer toutes les vidéos d'un certain auteur, et les reviews associées
+      responses:
+        200:
+          description: Toutes les vidéos de cet auteur ont été supprimées ainsi que les reviews associées
+
+
+components:
+  schemas:
+    video:
+      type: object
+      properties:
+        hash:
+          type: string
+          description: Hash de la vidéo
+        name:
+          type: string
+          description: Nom de la vidéo
+        author:
+          type: string
+          description: Auteur de la vidéo
+        creationYear:
+          type: integer
+          description: Année de création de la vidéo
+        duration:
+          type: integer
+          description: Durée de la vidéo, en secondes
+        url:
+          type: string
+          description: URL de la vidéo
+      example:
+        hash: dQw4w9WgXcQ
+        name: Cutest kitty ever
+        author: Cat4Life
+        creationYear: 2009
+        duration: 212
+        url: https://www.youtube.com/watch?v=dQw4w9WgXcQ

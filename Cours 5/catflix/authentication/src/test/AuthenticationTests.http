@@ -1,0 +1,35 @@
+### Create safeCredentials
+POST http://localhost:9004/authentication/KittyCat
+Content-Type: application/json
+
+{
+  "pseudo": "KittyCat",
+  "password": "NotSaying!1234"
+}
+
+### Update safeCredentials
+PUT http://localhost:9004/authentication/KittyCat
+Content-Type: application/json
+
+{
+  "pseudo": "KittyCat",
+  "password": "password123"
+}
+
+### Delete safeCredentials
+DELETE http://localhost:9004/authentication/KittyCat
+
+### Connect user
+POST http://localhost:9004/authentication/connect
+Content-Type: application/json
+
+{
+  "pseudo": "KittyCat",
+  "password": "password123"
+}
+
+### Verify token
+POST http://localhost:9004/authentication/verify
+Content-Type: text/plain
+
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJhdXRoMCIsInBzZXVkbyI6IkNhdDRMaWZlIn0.Gqd8DukYBF7dSE34facYcEI9L8HqXGWsjg-K7daYrhCG0fei0f8DaHYuZ05MGEzJNs_ywOoA4BfwScL2-nVUhw
